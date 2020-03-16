@@ -1,0 +1,61 @@
+﻿@namespace GGNet.Site.Pages
+@page "/notebooks"
+
+<section class="jumbotron jumbotron-fluid text-center">
+    <div class="container">
+        <h1 class="display-4">F# Notebooks</h1>
+        <p class="lead text-muted"><a href="https://github.com/pablofrommars/fsharp-notebook">fsharp-notebook</a> is a lightweight visualization tool to assist during data exploration and prototyping. In combination with <a href="https://ionide.io">ionide</a>, Visual Studio Code becomes a very capable F# IDE for data science.</p>
+        <a class="btn btn-primary btn-lg" href="https://marketplace.visualstudio.com/items?itemName=PabloBelin.fsharp-notebook" role="button">VS Code Marketplace</a>
+    </div>
+</section>
+
+<div class="container">
+
+<img src="/img/notebook.gif" class="w-100 m-3" />
+
+<h5>FSI Configuration</h5>
+
+<p>Load the following code in your scripts or add it to <a href="https://github.com/pablofrommars/fsharp-notebook#configure-ionide-fsharp">FSharp.fsiExtraParameters</a>.</p>
+
+<div class="border rounded-lg bg-light p-3 m-3">
+<pre class="fsharp">
+#load <span class="pl-s"><span class="pl-pds">&#64;"</span>.paket/load/netcoreapp3.1/GGNet.Static.fsx<span class="pl-pds">"</span></span>
+
+<span class="pl-k">open</span> <span class="pl-en">GGNet</span>
+<span class="pl-k">open</span> <span class="pl-en">GGNet.<span class="pl-en">Static</span></span>
+
+<span class="pl-k">open</span> <span class="pl-en">Notebook</span>
+
+fsi.AddPrinter(<span class="pl-k">fun</span> (plot <span class="pl-k">:</span> IData) <span class="pl-k">-&gt;</span>
+    plot.AsString<span class="pl-c1">()</span> 
+    <span class="pl-k">|&gt;</span> Async.AwaitTask 
+    <span class="pl-k">|&gt;</span> Async.RunSynchronously
+    <span class="pl-k">|&gt;</span> SVG
+    <span class="pl-k">|&gt;</span> printerNotebook
+)
+</pre>
+</div>
+
+<h5>Visual Studio Code Theme</h5>
+
+<p>You can customize plots to follow your <a href="https://code.visualstudio.com/api/references/theme-color">Color Theme</a> leveraging the exposed CSS variables.</p>
+
+<div class="border rounded-lg bg-light p-3 m-3">
+<pre class="fsharp">
+<span class="pl-k">let</span> <span class="pl-smi">theme</span> <span class="pl-k">=</span> Theme.Default<span class="pl-c1">()</span><span class="pl-k">;</span>
+
+theme.FontFamily <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-font-family)<span class="pl-pds">"</span></span>
+theme.Plot.Background.Fill <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-background)<span class="pl-pds">"</span></span>
+theme.Panel.Background.Fill <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-background)<span class="pl-pds">"</span></span>
+theme.Axis.Text.X.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+theme.Axis.Title.X.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+theme.Axis.Text.Y.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+theme.Axis.Title.Y.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+theme.Panel.Grid.Major.X.Fill <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editorLineNumber-foreground)<span class="pl-pds">"</span></span>
+theme.Panel.Grid.Minor.X.Fill <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editorLineNumber-foreground)<span class="pl-pds">"</span></span>
+theme.Legend.Title.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+theme.Legend.Labels.Color <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>var(--vscode-editor-foreground)<span class="pl-pds">"</span></span>
+</pre>
+</div>
+
+</div>

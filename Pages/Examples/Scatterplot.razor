@@ -49,9 +49,7 @@
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Iris.Point>(GGNet.Datasets.Iris.Load());
-
-        iris = GGNet.Plot.New(source, x: o => o.SepalLength, y: o => o.SepalWidth)
+        iris = GGNet.Plot.New(GGNet.Datasets.Iris.Load(), x: o => o.SepalLength, y: o => o.SepalWidth)
             .Title("Fisher's Iris")
             .Geom_Point()
             .XLab("Sepal Lenght (cm)")
