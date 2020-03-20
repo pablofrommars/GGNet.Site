@@ -1,0 +1,259 @@
+﻿@page "/covid19"
+
+@inject HttpClient Http
+
+@using System.Text.Json
+@using NodaTime
+@using NodaTime.Serialization.SystemTextJson
+@using GGNet
+
+@if (data == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row h-100 w-100 m-0 p-0">
+
+        <div class="col-md-6 col-lg-6 h-100 m-0 p-0 d-flex flex-column">
+            <div class="flex-grow-0 flex-md-shrink-1 pl-5">
+                <h2>2019–20 coronavirus pandemic</h2>
+                <p>Data Source: <a href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports"> World Health Organization - Situation Reports</a></p>
+            </div>
+            <div class="flex-grow-0 flex-md-shrink-1">
+                <div style="height: 0; padding-bottom: calc(360 / 720 * 100%);">
+                    <GGNet.Components.Plot Data=@map T="TS" TX="Double" TY="Double" Width="720" Height="360" />
+                </div>
+            </div>
+
+            <div class="position-relative d-flex flex-grow-1 flex-shrink-1">
+                <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
+                    <div class="d-flex flex-column" style="min-height: 0;">
+                        <div class="overflow-auto">
+                            <table class="table table-sm table-hover mt-3 mx-auto" style="width: 95%;">
+                                <thead>
+                                    <tr>
+                                        <th scope="row" class="text-center">#</th>
+                                        <th scope="col" class="text-left">Country</th>
+                                        <th scope="col" class="text-right">Confirmed</th>
+                                        <th scope="col" class="text-right">Deaths</th>
+                                        <th scope="col" class="text-right">Recovered</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ 
+                                        var i = 1;
+                                        foreach (var p in data.Select(o => (ts: o, point: o.Points.Last())).OrderByDescending(o => o.point.Confirmed))
+                                        {
+                                            <tr @onclick=@(_ => OnClick(p.ts)) style="cursor: pointer;">
+                                                <th scope="row"  class="text-center">@(i++)</th>
+                                                <td class="text-left">@(p.ts.Country)</td>
+                                                <td class="text-right">@($"{p.point.Confirmed:#,##0}")</td>
+                                                <td class="text-right">@($"{p.point.Deaths:#,##0}")</td>
+                                                <td class="text-right">@($"{p.point.Recovered:#,##0}")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-6 h-100 m-0 p-0 d-flex flex-column">
+            <div class="card w-100 h-100">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link @(showChart ? "active" : "")" href="" @onclick=Swap><i class="fas fa-chart-line mr-1"></i>Chart</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(showChart ? "" : "active")" href="" @onclick=Swap><i class="fas fa-table mr-1"></i>Data</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body d-flex p-0">
+                    <div class="tab-content d-flex flex-grow-1">
+
+                        <div class="tab-pane @(showChart ? "active" : "") flex-grow-1">
+                            <div class="h-100 mx-auto mt-3" style="width: 95%;">
+                                <GGNet.Components.Plot Data=@ts T="StatPoint" TX="LocalDate" TY="Double" @ref="plot" />
+                            </div>
+                        </div>
+
+                        <div class="tab-pane @(showChart ? "" : "d-flex flex-grow-1")">
+                            <div class="position-relative d-flex flex-grow-1">
+                                <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
+                                    <div class="d-flex flex-column" style="min-height: 0;">
+                                        <div class="overflow-auto">
+                                            <table class="table table-sm mt-3 mx-auto" style="width: 95%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="row" class="text-center">#</th>
+                                                        <th scope="col" class="text-left">Date</th>
+                                                        <th scope="col" class="text-right">Confirmed</th>
+                                                        <th scope="col" class="text-right">Deaths</th>
+                                                        <th scope="col" class="text-right">Recovered</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{
+                                                        var j = 1;
+                                                        foreach (var p in points.OrderByDescending(o => o.Date))
+                                                        {
+                                                            <tr>
+                                                                <th scope="row" class="text-center">@(j++)</th>
+                                                                <td class="text-left">@(p.Date)</td>
+                                                                <td class="text-right">@($"{p.Confirmed:#,##0}")</td>
+                                                                <td class="text-right">@($"{p.Deaths:#,##0}")</td>
+                                                                <td class="text-right">@($"{p.Recovered:#,##0}")</td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    TS[] data;
+    Point[] points;
+
+    Data<TS, double, double> map;
+
+    Source<StatPoint> source = new GGNet.Source<StatPoint>();
+    Data<StatPoint, LocalDate, double> ts;
+    GGNet.Components.Plot<StatPoint, LocalDate, double> plot;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //var json = await Http.GetStringAsync("https://gist.githubusercontent.com/pablofrommars/fe23999f2b857fcf0ed4b854f6d5316f/raw/f1824593c06bed80b8a02dfecf4d99dc3706d585/covid19.json");
+        var json = await Http.GetStringAsync("data/covid19.json");
+        var options = (new JsonSerializerOptions()).ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+        data = JsonSerializer.Deserialize<TS[]>(json, options);
+
+        var theme = Theme.Default(dark: false);
+
+        theme.Panel.Grid.Major.X.Alpha = 0.25;
+        theme.Panel.Grid.Minor.X.Alpha = 0.25;
+        theme.Panel.Grid.Major.Y.Alpha = 0.25;
+        theme.Panel.Grid.Minor.Y.Alpha = 0.25;
+
+        var capitals = new GGNet.Source<TS>(data);
+
+        var coastline = new GGNet.Source<GGNet.Datasets.Coastline.Polygon>(GGNet.Datasets.Coastline.Load());
+
+        map = Plot.New(capitals, o => o.Position.Value.Long, y: o => o.Position.Value.Lat)
+            .Geom_Map(coastline, o => o.Latitude, o => o.Longitude, fill: "grey", alpha: 0.1)
+            .Geom_Point(onclick: (ts, e) => OnClick(ts), color: "#000000", alpha: 0.5, animation: true)
+            .Scale_X_Continuous(limits: (-180, 180), expand: (0, 0, 0, 0), formatter: GGNet.Formats.Latitude.Instance)
+            .Scale_Y_Continuous(limits: (-90, 90), expand: (0, 0, 0, 0), formatter: GGNet.Formats.Longitude.Instance)
+            .Scale_Color_Discrete(o => o.Continent.Value, Colors.Viridis, guide: false)
+            .Scale_Size_Continuous(o => o.Points.Last().Confirmed, range: (1, 10), guide: false)
+            .Theme(theme);
+
+        points = GetCountry("China");
+        source.Add(GetStatPoint(points));
+
+        ts = Plot.New(source, o => o.Date, o => o.Value)
+            .Geom_Line()
+            .Scale_Y_Continuous("#,##0")
+            .Scale_Color_Discrete(o => o.Stat, Colors.Ipsum, guide: true)
+            .Title("China")
+            .Theme(dark: false, legend: GGNet.Position.Bottom);
+    }
+
+    public Task OnClick(TS point)
+    {
+        source.Clear();
+
+        points = GetCountry(point.Country);
+        source.Add(GetStatPoint(points));
+
+        ts.Title(point.Country);
+
+        ts.Render(false);
+        plot.Render();
+
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    Point[] GetCountry(string country) => data.First(o => o.Country == country).Points;
+
+    IEnumerable<StatPoint> GetStatPoint(Point[] points) =>
+        points
+        .SelectMany(p => new[]
+        {
+            new StatPoint { Stat = Stat.Confirmed, Date = p.Date, Value = p.Confirmed },
+            new StatPoint { Stat = Stat.Deaths, Date = p.Date, Value = p.Deaths },
+            new StatPoint { Stat = Stat.Recovered, Date = p.Date, Value = p.Recovered }
+        });
+
+    private bool showChart = true;
+
+    private void Swap() => showChart = !showChart;
+
+    public class Option<T>
+    {
+        public T Value { get; set; }
+    }
+
+    public class Position
+    {
+        public double Lat { get; set; }
+        public double Long { get; set; }
+    }
+
+    public class Point
+    {
+        public LocalDate Date { get; set; }
+
+        public double Confirmed { get; set; }
+        public double Deaths { get; set; }
+        public double Recovered { get; set; }
+    }
+
+    public class TS
+    {
+        public string Country { get; set; }
+
+        public Option<string>
+            Continent { get; set; }
+
+        public Option<Position>
+            Position { get; set; }
+
+        public Point[] Points { get; set; }
+
+    }
+
+    public enum Stat
+    {
+        Confirmed,
+        Deaths,
+        Recovered
+    }
+
+    public class StatPoint
+    {
+        public Stat Stat { get; set; }
+
+        public LocalDate Date { get; set; }
+
+        public double Value { get; set; }
+    }
+}
