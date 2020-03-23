@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @using GGNet
+@using GGNet.Datasets
 
 @inject HttpClient Http
 
@@ -16,7 +17,7 @@
             </div>
             <div class="col-md-4">
                 <div class="chart-iris bg-white border rounded-lg shadow p-3">
-                    <GGNet.Components.Plot Data=@iris T="GGNet.Datasets.Iris.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@iris T="Iris.Point" TX="Double" TY="Double" />
                 </div>
             </div>
         </div>
@@ -52,17 +53,15 @@
 </div>
 
 @code {
-    GGNet.Data<GGNet.Datasets.Iris.Point, double, double> iris;
+    Data<Iris.Point, double, double> iris;
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Iris.Point>(GGNet.Datasets.Iris.Load());
-
-        iris = GGNet.Plot.New(source, x: o => o.SepalLength, y: o => o.SepalWidth)
+        iris = Plot.New(Iris.Load(), x: o => o.SepalLength, y: o => o.SepalWidth)
             .Title("Fisher's Iris")
             .Geom_Point()
             .XLab("Sepal Lenght (cm)")
-            .Scale_Color_Discrete(o => o.Species, GGNet.Colors.Viridis, name: "Species")
+            .Scale_Color_Discrete(o => o.Species, Colors.Viridis, name: "Species")
             .YLab("Sepal Width (cm)")
             .Theme(dark: false);
     }

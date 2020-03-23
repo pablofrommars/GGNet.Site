@@ -73,3 +73,8 @@
     background-color: #f8f8f8;
     color: #2a77bf;
 }
+
+.fa-blank::after {
+    width: 1em;
+    content: '\A0';
+}

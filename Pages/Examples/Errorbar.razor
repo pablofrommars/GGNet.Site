@@ -2,6 +2,7 @@
 @page "/examples/errorbar"
 
 @using GGNet
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
         
@@ -29,7 +30,7 @@
             </div>
             <div class="col-md-6">
                 <div class="border rounded-lg p-1" style="background-color: #252A32;">
-                    <GGNet.Components.Plot Data=@tip T="GGNet.Datasets.Tip.Point" TX="GGNet.Datasets.Tip.Day" TY="Double" />
+                    <GGNet.Components.Plot Data=@tip T="Tip.Point" TX="Tip.Day" TY="Double" />
                 </div>
             </div>
         </div>
@@ -37,13 +38,11 @@
 
 @code {
 
-    Data<GGNet.Datasets.Tip.Point, GGNet.Datasets.Tip.Day, double> tip;
+    Data<Tip.Point, Tip.Day, double> tip;
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Tip.Point>(GGNet.Datasets.Tip.Load());
-
-        tip = Plot.New(source, o => o.Day, o => o.Avg)
+        tip = Plot.New(Tip.Load(), o => o.Day, o => o.Avg)
             .Geom_ErrorBar(ymin: o => o.Lower, ymax: o => o.Upper, position: PositionAdjustment.Dodge)
             .Scale_Color_Discrete(o => o.Sex, new[] { "#69b3a2", "#404080" })
             .YLab("Tip (%)")

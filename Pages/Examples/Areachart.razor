@@ -2,6 +2,7 @@
 @page "/examples/areachart"
 
 @using GGNet
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -37,7 +38,7 @@
             </div>
             <div class="col-md-6">
                 <div class="border rounded-lg p-1" style="background-color: #252A32;">
-                    <GGNet.Components.Plot Data=@beatles1 T="GGNet.Datasets.Beatles.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@beatles1 T="Beatles.Point" TX="Double" TY="Double" />
                 </div>
             </div>
         </div>
@@ -45,18 +46,13 @@
 
 @code {
 
-    Data<GGNet.Datasets.Beatles.Point, double, double> beatles1;
+    Data<Beatles.Point, double, double> beatles1;
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Beatles.Point>(GGNet.Datasets.Beatles.Load());
-
-        var vline = new GGNet.Source<double>();
-        vline.Add(1984);
-
-        beatles1 = Plot.New(source, x: o => o.Year)
+        beatles1 = Plot.New(Beatles.Load(), x: o => o.Year)
             .Geom_Area(y: o => o.N)
-            .Geom_VLine(vline, o => o, color: "#FFFFFF", lineType: LineType.Dashed)
+            .Geom_VLine(new[] { 1984 }, o => o, color: "#FFFFFF", lineType: LineType.Dashed)
             .Scale_Fill_Discrete(o => o.Name, GGNet.Colors.FT, guide: false)
             .Facet_Wrap(selector: o => o.Name, freeY: true)
             .Title("Popularity of Beatles Names")

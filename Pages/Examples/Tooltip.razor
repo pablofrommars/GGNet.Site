@@ -14,7 +14,7 @@
 
 <pre class="csharp">
 <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Weight</span>, <span class="pl-smi">y</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">MPG</span>)
-    .<span class="pl-en">Geom_Point</span>(<span class="pl-smi">tooltip</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-k">new</span>[] { <span class="pl-s"><span class="pl-pds">$"</span>Model: {<span class="pl-smi">o</span>.<span class="pl-smi">Model</span>}<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">$"</span>Horse Power: {<span class="pl-smi">o</span>.<span class="pl-smi">HP</span>}<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">$"</span>Cylinders: {<span class="pl-smi">o</span>.<span class="pl-smi">Cylinders</span>}<span class="pl-pds">"</span></span> })
+    .<span class="pl-en">Geom_Point</span>(<span class="pl-smi">tooltip</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">$"</span>&lt;b&gt;Model:&lt;/b&gt; {<span class="pl-smi">o</span>.<span class="pl-smi">Model</span>}&lt;br/&gt;&lt;b&gt;Horse Power:&lt;/b&gt; {<span class="pl-smi">o</span>.<span class="pl-smi">HP</span>}&lt;br/&gt;&lt;b&gt;Cylinders:&lt;/b&gt; {<span class="pl-smi">o</span>.<span class="pl-smi">Cylinders</span>}<span class="pl-pds">"</span></span>)
     .<span class="pl-en">XLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Weight (1K lbs)<span class="pl-pds">"</span></span>)
     .<span class="pl-en">YLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Miles/Gallon<span class="pl-pds">"</span></span>)
     .<span class="pl-en">Caption</span>(<span class="pl-s"><span class="pl-pds">"</span>source: Motor Trend<span class="pl-pds">"</span></span>)
@@ -38,10 +38,8 @@
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Cars.Point>(GGNet.Datasets.Cars.Load());
-
-        cars = Plot.New(source, x: o => o.Weight, y: o => o.MPG)
-            .Geom_Point(tooltip: o => new[] { $"Model: {o.Model}", $"Horse Power: {o.HP}", $"Cylinders: {o.Cylinders}" })
+        cars = Plot.New(GGNet.Datasets.Cars.Load(), x: o => o.Weight, y: o => o.MPG)
+            .Geom_Point(tooltip: o => $"<b>Model:</b> {o.Model}<br/><b>Horse Power:</b> {o.HP}<br/><b>Cylinders:</b> {o.Cylinders}")
             .XLab("Weight (1K lbs)")
             .YLab("Miles/Gallon")
             .Caption("source: Motor Trend")
