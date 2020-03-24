@@ -1,0 +1,38 @@
+﻿@namespace GGNet.Site.Pages
+@layout DocumentationLayout
+@page "/documentation/sparklines"
+
+<h1>Spark Lines</h1>
+
+<p>Spark Lines are minimalistic graphics most often embedded in data tables. They are created like any regular chart and backed by the same principles.</p>
+
+<h5>Blazor template</h5>
+
+    <div class="border rounded-lg bg-light p-3 m-3">
+        <pre>
+&#64;using GGNet 
+&#64;using GGNet.Components
+</pre>
+<pre class="html">
+<span class="pl-kos">&lt;</span><span class="pl-ent">SparkLine</span> <span class="pl-c1">Data</span>=<span class="pl-s">&#64;data</span> <span class="pl-c1">T</span>="<span class="pl-s">T</span>" <span class="pl-c1">TX</span>="<span class="pl-s">TX</span>" <span class="pl-c1">TY</span>="<span class="pl-s">TY</span>" /&gt;
+</pre>
+
+<pre class="csharp">
+<span class="pl-smi">&#64;code</span> {
+
+   <span class="pl-en">Data</span>&lt;<span class="pl-en">T</span>, <span class="pl-en">TX</span>, <span class="pl-en">TY</span>&gt; <span class="pl-smi">data</span>;
+
+   <span class="pl-smi">protected</span> <span class="pl-smi">override</span> <span class="pl-smi">void</span> <span class="pl-en">OnInitialized</span>()
+   {
+      <span class="pl-k">var</span> <span class="pl-smi">source</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Source</span>&lt;<span class="pl-en">T</span>&gt;(...);
+        
+      <span class="pl-smi">data</span> <span class="pl-k">=</span> <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>..., <span class="pl-smi">y</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>...)
+        .<span class="pl-en">Geom_...</span>(...)
+        .<span class="pl-en">Scale_...</span>(...)
+        .<span class="pl-en">Theme</span>(...);
+   }
+}
+</pre>
+    </div>
+
+

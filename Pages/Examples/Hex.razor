@@ -2,6 +2,7 @@
 @page "/examples/hex"
 
 @using GGNet
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -47,14 +48,13 @@
 
     protected override void OnInitialized()
     {
-        var source = new Source<GGNet.Datasets.Diamond.Point>(GGNet.Datasets.Diamond.Load());
 
-        diamond = Plot.New(source, x: o => o.Carat, y: o => o.Price)
+        diamond = Plot.New(Diamond.Load(), x: o => o.Carat, y: o => o.Price)
             .Geom_Hex(dx: o => o.Dx, dy: o => o.Dy)
             .Title("Prices of 50,000 round cut diamonds")
             .XLab("Carat")
             .YLab("Price($)")
-            .Scale_Fill_Continuous(o => o.Count, GGNet.Colors.Viridis, m: 10, name: "Count")
+            .Scale_Fill_Continuous(o => o.Count, Colors.Viridis, m: 10, name: "Count")
             .Theme(dark: false);
     }
 }

@@ -26,7 +26,7 @@ else
             </div>
             <div class="flex-grow-0 flex-md-shrink-1">
                 <div style="height: 0; padding-bottom: calc(360 / 720 * 100%);">
-                    <GGNet.Components.Plot Data=@map T="TS" TX="Double" TY="Double" Width="720" Height="360" />
+                    <GGNet.Components.Plot Data=@map T=TS TX=Double TY=Double Width=720 Height=360 />
                 </div>
             </div>
 
@@ -34,19 +34,27 @@ else
                 <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
                     <div class="d-flex flex-column" style="min-height: 0;">
                         <div class="overflow-auto mx-auto pt-3" style="width: 95%;">
-                            <Table Loader="LoaderTS" Context="p" Small="true" Hover="true" OnRowClick=@((TS o) => OnClick(o))>
+                            <Table Loader=LoaderTS Context="p" Small=true Hover=true OnRowClick=@((TS o) => OnClick(o))>
                                 <Loading><p>Loading...</p></Loading>
                                 <Header>
-                                    <Column Field="Country" Sortable="true" />
-                                    <Column Field="Confirmed" Sortable="true" />
-                                    <Column Field="Deaths" Sortable="true" />
-                                    <Column Field="Recovered" Sortable="true" />
+                                    <Column Field="Country" Sortable=true />
+                                    <Column Field="Confirmed" Sortable=true />
+                                    <Column Field="Deaths" Sortable=true />
+                                    <Column Field="Recovered" Sortable=true />
+                                    <Column Label="" />
                                 </Header>
                                 <Row>
                                     <Cell>@(p.Country)</Cell>
-                                    <Cell Align="Align.Right">@($"{p.Confirmed:#,##0}")</Cell>
-                                    <Cell Align="Align.Right">@($"{p.Deaths:#,##0}")</Cell>
-                                    <Cell Align="Align.Right">@($"{p.Recovered:#,##0}")</Cell>
+                                    <Cell Align=Align.Right>@($"{p.Confirmed:#,##0}")</Cell>
+                                    <Cell Align=Align.Right>@($"{p.Deaths:#,##0}")</Cell>
+                                    <Cell Align=Align.Right>@($"{p.Recovered:#,##0}")</Cell>
+                                    <Cell> @{
+                                        var spark = Plot.New(p.Points.TakeLast(15), o => o.Date, o => o.Deaths)
+                                            .Geom_Bar(fill: "#000000", alpha: 0.8)
+                                            .Theme(dark: false);
+
+                                       <div style="width: 75px; height: 25px;"><GGNet.Components.SparkLine Data=@spark T=Point TX=LocalDate TY=Double @key=@p /></div>
+                                    }</Cell>
                                 </Row>
                             </Table>
                         </div>
@@ -72,7 +80,7 @@ else
 
                         <div class="tab-pane @(showChart ? "active" : "") flex-grow-1">
                             <div class="h-100 mx-auto mt-3" style="width: 95%;">
-                                <GGNet.Components.Plot Data=@ts T="StatPoint" TX="LocalDate" TY="Double" @ref="plot" />
+                                <GGNet.Components.Plot Data=@ts T=StatPoint TX=LocalDate TY=Double @ref=@plot />
                             </div>
                         </div>
 
@@ -81,7 +89,7 @@ else
                                 <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
                                     <div class="d-flex flex-column" style="min-height: 0;">
                                         <div class="overflow-auto pt-3 mx-auto" style="width: 95%;">
-                                            <Table Loader="LoaderPoints" Context="p" Small="true">
+                                            <Table Loader="LoaderPoints" Context="p" Small=true>
                                                 <Loading><p>Loading...</p></Loading>
                                                 <Header>
                                                     <Column Field="Date" />
@@ -91,9 +99,9 @@ else
                                                 </Header>
                                                 <Row>
                                                     <Cell>@(p.Date)</Cell>
-                                                    <Cell Align="Align.Right">@($"{p.Confirmed:#,##0}")</Cell>
-                                                    <Cell Align="Align.Right">@($"{p.Deaths:#,##0}")</Cell>
-                                                    <Cell Align="Align.Right">@($"{p.Recovered:#,##0}")</Cell>
+                                                    <Cell Align=Align.Right>@($"{p.Confirmed:#,##0}")</Cell>
+                                                    <Cell Align=Align.Right>@($"{p.Deaths:#,##0}")</Cell>
+                                                    <Cell Align=Align.Right>@($"{p.Recovered:#,##0}")</Cell>
                                                 </Row>
                                             </Table>
                                         </div>
