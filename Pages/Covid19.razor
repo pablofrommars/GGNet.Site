@@ -48,13 +48,15 @@ else
                                     <Cell Align=Align.Right>@($"{p.Confirmed:#,##0}")</Cell>
                                     <Cell Align=Align.Right>@($"{p.Deaths:#,##0}")</Cell>
                                     <Cell Align=Align.Right>@($"{p.Recovered:#,##0}")</Cell>
-                                    <Cell> @{
-                                        var spark = Plot.New(p.Points.TakeLast(15), o => o.Date, o => o.Deaths)
-                                            .Geom_Bar(fill: "#000000", alpha: 0.8)
-                                            .Theme(dark: false);
+                                    <Cell>
+                                        @{
+                                            var spark = Plot.New(p.Points.TakeLast(15), o => o.Date, o => o.Deaths)
+                                                .Geom_Bar(tooltip: o => $"{o.Deaths:#,###0}", fill: Colors.Ipsum[4], alpha: 0.8, animation: true)
+                                                .Theme(sparkTheme);
 
-                                       <div style="width: 75px; height: 25px;"><GGNet.Components.SparkLine Data=@spark T=Point TX=LocalDate TY=Double @key=@p /></div>
-                                    }</Cell>
+                                            <div style="width: 75px; height: 25px;"><GGNet.Components.SparkLine Data=@spark T=Point TX=LocalDate TY=Double @key=@p /></div>
+                                        }
+                                    </Cell>
                                 </Row>
                             </Table>
                         </div>
@@ -127,6 +129,8 @@ else
     Data<StatPoint, LocalDate, double> ts;
     GGNet.Components.Plot<StatPoint, LocalDate, double> plot;
 
+    Theme sparkTheme;
+
     protected override async Task OnInitializedAsync()
     {
         //var json = await Http.GetStringAsync("https://gist.githubusercontent.com/pablofrommars/fe23999f2b857fcf0ed4b854f6d5316f/raw/f1824593c06bed80b8a02dfecf4d99dc3706d585/covid19.json");
@@ -169,6 +173,9 @@ else
             .Scale_Color_Discrete(o => o.Stat, Colors.Ipsum, guide: true)
             .Title("China")
             .Theme(dark: false, legend: GGNet.Position.Bottom);
+
+        sparkTheme = Theme.Default(dark: false);
+        sparkTheme.Tooltip.Size = new Size { Value = 16, Units = Units.px };
     }
 
     private Task<IList<TS>> LoaderTS() => Task.FromResult(data as IList<TS>);

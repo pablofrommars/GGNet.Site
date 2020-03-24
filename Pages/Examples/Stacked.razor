@@ -2,6 +2,8 @@
 @page "/examples/stacked"
 
 @using GGNet
+@using GGNet.Formats
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -35,7 +37,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@beatles3 T="GGNet.Datasets.Beatles.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@beatles T=Beatles.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -44,16 +46,16 @@
 
 @code {
 
-    Data<GGNet.Datasets.Beatles.Point, double, double> beatles3;
+    Data<Beatles.Point, double, double> beatles;
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Beatles.Point>(GGNet.Datasets.Beatles.Load()
+        var source = new Source<Beatles.Point>(Beatles.Load()
                 .Where(o => o.Year == 2010 || o.Year == 1970 || o.Year == 1930)
                 .OrderBy(o => o.Year)
                 .ThenBy(o => o.Name));
 
-        double X(GGNet.Datasets.Beatles.Point p) => p.Year switch
+        double X(Beatles.Point p) => p.Year switch
         {
             1930 => 1.0,
             1970 => 2.0,
@@ -61,17 +63,17 @@
             _ => throw new ArgumentException()
         };
 
-        var labeller = new GGNet.Formats.Labeller<double>
+        var labeller = new Labeller<double>
         {
             [1.0] = "1930",
             [2.0] = "1970",
             [3.0] = "2010"
         };
 
-        beatles3 = Plot.New(source, x: X, y: o => o.N)
+        beatles = Plot.New(source, x: X, y: o => o.N)
             .Geom_Bar(position: PositionAdjustment.Stack, width: 0.5)
             .Scale_X_Discrete(expand: (0.0, 0.1, 0, 0.1), formatter: labeller)
-            .Scale_Fill_Discrete(o => o.Name, GGNet.Colors.Brewer.YlGnBu[4], direction: -1)
+            .Scale_Fill_Discrete(o => o.Name, Colors.Brewer.YlGnBu[4], direction: -1)
             .YLab("#")
             .XLab("Year")
             .Theme(dark: false);

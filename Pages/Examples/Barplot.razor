@@ -36,7 +36,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@beatles4 T="Beatles.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@beatles T=Beatles.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -45,7 +45,7 @@
 
 @code {
 
-    Data<Beatles.Point, double, double> beatles4;
+    Data<Beatles.Point, double, double> beatles;
 
     protected override void OnInitialized()
     {
@@ -69,7 +69,7 @@
             [3.0] = "2010"
         };
 
-        beatles4 = Plot.New(source, x: X, y: o => o.N)
+        beatles = Plot.New(source, x: X, y: o => o.N)
             .Geom_Bar(position: PositionAdjustment.Dodge)
             .Scale_X_Discrete(expand: (0.0, 0.1, 0, 0.1), formatter: labeller)
             .Scale_Fill_Discrete(o => o.Name, Colors.Brewer.YlGnBu[4], direction: -1)

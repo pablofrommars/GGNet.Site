@@ -2,6 +2,8 @@
 @page "/examples/hbarplot"
 
 @using GGNet
+@using GGNet.Formats
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -36,7 +38,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@weapon T="GGNet.Datasets.Weapon.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@weapon T=Weapon.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -45,16 +47,16 @@
 
 @code {
 
-    Data<GGNet.Datasets.Weapon.Point, double, double> weapon;
+    Data<Weapon.Point, double, double> weapon;
 
     protected override void OnInitialized()
     {
         var n = 15;
 
-        var data = GGNet.Datasets.Weapon.Load()
+        var data = Weapon.Load()
             .OrderByDescending(o => o.Value)
             .Take(n)
-            .Select((o, i) => new GGNet.Datasets.Weapon.Point
+            .Select((o, i) => new Weapon.Point
             {
                 Id = n - i,
                 Country = o.Country,
@@ -63,9 +65,9 @@
             .OrderBy(o => o.Id)
             .ToList();
 
-        var labeller = new GGNet.Formats.Labeller<double>(data.ToDictionary(o => (double)o.Id, o => o.Country));
+        var labeller = new Labeller<double>(data.ToDictionary(o => (double)o.Id, o => o.Country));
 
-        var source = new GGNet.Source<GGNet.Datasets.Weapon.Point>(data);
+        var source = new Source<Weapon.Point>(data);
 
         weapon = Plot.New(source, o => o.Value, o => o.Id)
             .Geom_Bar(fill: "#69b3a2")
