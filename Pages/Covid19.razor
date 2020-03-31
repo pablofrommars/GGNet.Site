@@ -2,12 +2,12 @@
 
 @inject HttpClient Http
 
-@using System.Text.Json
-
 @using NodaTime
-@using NodaTime.Serialization.SystemTextJson
 
 @using GGNet
+@using GGNet.Palettes
+@using GGNet.Elements
+@using GGNet.NaturalEarth
 
 @using Table.Net 
 
@@ -33,29 +33,59 @@ else
             <div class="position-relative d-flex flex-grow-1 flex-shrink-1">
                 <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
                     <div class="d-flex flex-column" style="min-height: 0;">
-                        <div class="overflow-auto mx-auto pt-3" style="width: 95%;">
-                            <Table Loader=LoaderTS Context="p" Small=true Hover=true OnRowClick=@((TS o) => OnClick(o))>
+                        <div class="pt-3" style="overflow-x: hidden; overflow-y: auto;">
+                            <Table Loader=@(() => Loader.Data(data)) Context="p" Small=true OnRowClick=@((TS o) => OnClick(o))>
                                 <Loading><p>Loading...</p></Loading>
                                 <Header>
-                                    <Column Field="Country" Sortable=true />
-                                    <Column Field="Confirmed" Sortable=true />
-                                    <Column Field="Deaths" Sortable=true />
-                                    <Column Field="Recovered" Sortable=true />
-                                    <Column Label="" />
+                                    <Column Field="Name" Label="Country" Sortable=true />
+                                    <Column Field="ConfirmedCumulative" Label="Confirmed" Sortable=true />
+                                    <Column Field="ConfirmedDelta" Label="&Delta;" Sortable=true />
+                                    <Column Field="DeathsCumulative" Label="Deaths" Sortable="true" />
+                                    <Column Field="DeathsDelta" Label="&Delta;" Sortable=true />
                                 </Header>
                                 <Row>
-                                    <Cell>@(p.Country)</Cell>
-                                    <Cell Align=Align.Right>@($"{p.Confirmed:#,##0}")</Cell>
-                                    <Cell Align=Align.Right>@($"{p.Deaths:#,##0}")</Cell>
-                                    <Cell Align=Align.Right>@($"{p.Recovered:#,##0}")</Cell>
-                                    <Cell>
-                                        @{
-                                            var spark = Plot.New(p.Points.TakeLast(15), o => o.Date, o => o.Deaths)
-                                                .Geom_Bar(tooltip: o => $"{o.Deaths:#,###0}", fill: Colors.Ipsum[4], alpha: 0.8, animation: true)
-                                                .Theme(sparkTheme);
 
-                                            <div style="width: 75px; height: 25px;"><GGNet.Components.SparkLine Data=@spark T=Point TX=LocalDate TY=Double @key=@p /></div>
-                                        }
+                                    @{
+                                            var (confirmed, deaths) = sparks[p.Country.A2];
+                                    }
+
+                                    <Cell>@(p.Country.Name)</Cell>
+
+                                    <Cell Align=Align.Right>
+                                        <div class="row text-center">
+                                            <div class="col">
+                                                <div style="width: 75px; height: 25px;">
+                                                    <GGNet.Components.SparkLine Data=@confirmed T=TS.Point TX=LocalDate TY=Double />
+                                                </div>
+                                            </div>
+                                            <div class="col" style="font-size: 0.75em;">
+                                                @($"{p.ConfirmedCumulative:#,##0}")
+                                            </div>
+                                        </div>
+
+                                    </Cell>
+                                    <Cell Align=Align.Right>
+                                        <div style="font-size: 0.75em;">
+                                            +@($"{p.ConfirmedDelta:#,##0}")
+                                        </div>
+                                    </Cell>
+                                    <Cell Align=Align.Right>
+                                        <div class="row text-center">
+                                            <div class="col">
+                                                <div style="width: 75px; height: 25px;">
+                                                    <GGNet.Components.SparkLine Data=@deaths T=TS.Point TX=LocalDate TY=Double />
+                                                </div>
+                                            </div>
+                                            <div class="col" style="font-size: 0.75em;">
+                                                @($"{p.DeathsCumulative:#,##0}")
+                                            </div>
+                                        </div>
+
+                                    </Cell>
+                                    <Cell Align=Align.Right>
+                                        <div style="font-size: 0.75em;">
+                                            +@($"{p.DeathsDelta:#,##0}")
+                                        </div>
                                     </Cell>
                                 </Row>
                             </Table>
@@ -82,7 +112,7 @@ else
 
                         <div class="tab-pane @(showChart ? "active" : "") flex-grow-1">
                             <div class="h-100 mx-auto mt-3" style="width: 95%;">
-                                <GGNet.Components.Plot Data=@ts T=StatPoint TX=LocalDate TY=Double @ref=@plot />
+                                <GGNet.Components.Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto @ref=@statPlot />
                             </div>
                         </div>
 
@@ -91,19 +121,17 @@ else
                                 <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
                                     <div class="d-flex flex-column" style="min-height: 0;">
                                         <div class="overflow-auto pt-3 mx-auto" style="width: 95%;">
-                                            <Table Loader="LoaderPoints" Context="p" Small=true>
+                                            <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
                                                 <Loading><p>Loading...</p></Loading>
                                                 <Header>
-                                                    <Column Field="Date" />
-                                                    <Column Field="Confirmed" />
-                                                    <Column Field="Deaths" />
-                                                    <Column Field="Recovered" />
+                                                    <Column Field="Date" Sort="-1"/>
+                                                    <Column Label="Confirmed" />
+                                                    <Column Label="Deaths" />
                                                 </Header>
                                                 <Row>
                                                     <Cell>@(p.Date)</Cell>
-                                                    <Cell Align=Align.Right>@($"{p.Confirmed:#,##0}")</Cell>
-                                                    <Cell Align=Align.Right>@($"{p.Deaths:#,##0}")</Cell>
-                                                    <Cell Align=Align.Right>@($"{p.Recovered:#,##0}")</Cell>
+                                                    <Cell Align=Align.Left>@($"{p.ConfirmedCumulative:#,##0} (+{p.ConfirmedDelta:#,##0})")</Cell>
+                                                    <Cell Align=Align.Left>@($"{p.DeathsCumulative:#,##0} (+{p.DeathsDelta:#,##0})")</Cell>
                                                 </Row>
                                             </Table>
                                         </div>
@@ -121,32 +149,41 @@ else
 
 @code {
     List<TS> data;
-    List<Point> points;
+    TS ts;
 
     Data<TS, double, double> map;
 
-    Source<StatPoint> source = new GGNet.Source<StatPoint>();
-    Data<StatPoint, LocalDate, double> ts;
-    GGNet.Components.Plot<StatPoint, LocalDate, double> plot;
+    List<StatPoint> statPoints;
+    Source<StatPoint> statSource = new Source<StatPoint>();
+    Data<StatPoint, LocalDate, double> statData;
+    GGNet.Components.Plot<StatPoint, LocalDate, double> statPlot;
 
-    Theme sparkTheme;
+    Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)> sparks =
+        new Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)>();
 
     protected override async Task OnInitializedAsync()
     {
-        //var json = await Http.GetStringAsync("https://gist.githubusercontent.com/pablofrommars/fe23999f2b857fcf0ed4b854f6d5316f/raw/f1824593c06bed80b8a02dfecf4d99dc3706d585/covid19.json");
-        var json = await Http.GetStringAsync("data/covid19.json");
-        var options = (new JsonSerializerOptions()).ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-        data = JsonSerializer.Deserialize<List<TS>>(json, options);
+        data = await GetData();
+
+        var sparkTheme = Theme.Default(dark: false);
+        sparkTheme.Tooltip.Text.Size = new Size { Value = 16, Units = Units.px };
 
         foreach (var ts in data)
         {
-            var last = ts.Points.Last();
-            ts.Confirmed = last.Confirmed;
-            ts.Deaths = last.Deaths;
-            ts.Recovered = last.Recovered;
+            var source = new Source<TS.Point>(ts.Points.TakeLast(15));
+
+            var confirmed = Plot.New(source, o => o.Date, o => o.ConfirmedCumulative)
+                .Geom_Bar(tooltip: o => $"{o.ConfirmedCumulative:#,###0}", fill: "#758bd1", alpha: 0.8, animation: true)
+                .Theme(sparkTheme);
+
+            var deaths = Plot.New(source, o => o.Date, o => o.DeathsCumulative)
+                .Geom_Bar(tooltip: o => $"{o.DeathsCumulative:#,###0}", fill: "#d18975", alpha: 0.8, animation: true)
+                .Theme(sparkTheme);
+
+            sparks[ts.Country.A2] = (confirmed, deaths);
         }
 
-        data = data.OrderByDescending(o => o.Confirmed).ToList();
+        data = data.OrderByDescending(o => o.ConfirmedCumulative).ToList();
 
         var theme = Theme.Default(dark: false);
 
@@ -155,120 +192,65 @@ else
         theme.Panel.Grid.Major.Y.Alpha = 0.25;
         theme.Panel.Grid.Minor.Y.Alpha = 0.25;
 
-        map = Plot.New(data, o => o.Position.Value.Long, y: o => o.Position.Value.Lat)
-            .Geom_Map(GGNet.Datasets.Coastline.Load(), o => o.Latitude, o => o.Longitude, fill: "grey", alpha: 0.1)
-            .Geom_Point(onclick: (ts, e) => OnClick(ts), color: "#000000", alpha: 0.5, animation: true)
-            .Scale_X_Continuous(limits: (-180, 180), expand: (0, 0, 0, 0), formatter: GGNet.Formats.Latitude.Instance)
-            .Scale_Y_Continuous(limits: (-90, 90), expand: (0, 0, 0, 0), formatter: GGNet.Formats.Longitude.Instance)
-            .Scale_Color_Discrete(o => o.Continent.Value, Colors.Viridis, guide: false)
-            .Scale_Size_Continuous(o => o.Points.Last().Confirmed, range: (1, 12), guide: false)
+        theme.Tooltip.Margin = new Margin();
+        theme.Tooltip.Background = "#FFFFFF";
+        theme.Tooltip.Alpha = 1.0;
+        theme.Tooltip.Text.Color = "#000000";
+
+        map = Plot.New(data, o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
+            .Geom_Map(Scale110.Coastline, fill: "grey", alpha: 0.1)
+            .Geom_Point(onclick: (ts, e) => OnClick(ts), tooltip: Tooltip, color: "#000000", alpha: 0.5, animation: true)
+            .Scale_Longitude()
+            .Scale_Latitude()
+            .Scale_Color_Discrete(o => o.Country.Continent, Colors.Viridis, guide: false)
+            .Scale_Size_Continuous(o => o.ConfirmedCumulative, range: (1, 12), guide: false)
             .Theme(theme);
 
-        points = GetCountry("China").ToList();
-        source.Add(GetStatPoint(points));
+        ts = data.Single(o => o.Country.A2 == "CN");
+        statPoints = GetStatPoints(ts.Points);
+        statSource.Add(statPoints);
 
-        ts = Plot.New(source, o => o.Date, o => o.Value)
-            .Geom_Line(tooltip: o => $"<b>{o.Date}</b><br/>{o.Stat}: {o.Value:#,##0}", width: 3, alpha: 0.8)
+        var palette = Discrete<Stat, string>.Enum(new[] { "#758bd1", "#d18975" });
+
+        statData = Plot.New(statSource, o => o.Date, o => o.Cumulative)
+            .Geom_Bar(y: o => o.Delta, tooltip: Tooltip, alpha: 0.6, position: PositionAdjustment.Stack)
+            .Geom_Line(tooltip: Tooltip, width: 3, alpha: 0.8)
             .Scale_Y_Continuous("#,##0")
-            .Scale_Color_Discrete(o => o.Stat, Colors.Ipsum, guide: true)
+            .Scale_Color_Discrete(o => o.Stat, palette)
+            .Scale_Fill_Discrete(o => o.Stat, palette, guide: false)
             .Title("China")
             .Theme(dark: false, legend: GGNet.Position.Bottom);
-
-        sparkTheme = Theme.Default(dark: false);
-        sparkTheme.Tooltip.Size = new Size { Value = 16, Units = Units.px };
     }
 
-    private Task<IList<TS>> LoaderTS() => Task.FromResult(data as IList<TS>);
-
-    private Task<IList<Point>> LoaderPoints() => Task.FromResult(points as IList<Point>);
-
-    public Task OnClick(TS point)
+    public async Task OnClick(TS point)
     {
-        source.Clear();
-        points.Clear();
+        statSource.Clear();
+        statPoints.Clear();
 
-        points.AddRange(GetCountry(point.Country));
-        source.Add(GetStatPoint(points));
+        statPoints.AddRange(GetStatPoints(point.Points));
+        statSource.Add(statPoints);
 
-        ts.Title(point.Country);
-
-        ts.Render(false);
-        plot.Render();
+        statData.Title(point.Country.Name);
 
         StateHasChanged();
 
-        return Task.CompletedTask;
+        await statPlot.RefreshAsync().ConfigureAwait(false);
     }
 
-    IEnumerable<Point> GetCountry(string country) => data
-        .First(o => o.Country == country)
-        .Points.OrderByDescending(o => o.Date);
+    public string Tooltip(TS ts) =>
+$@"
+<div class=""border rounded"" style=""padding: 5px 10px;"">
+    <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{ts.Country.Name}</div>
+    <div class=""d-flex justify-content-center"">
+        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: #758bd1"">{ts.ConfirmedCumulative:#,##0} (+{ts.ConfirmedDelta:#,##0})</div></div>
+        <div><div class=""text-center"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: #d18975"">{ts.DeathsCumulative:#,##0} (+{ts.DeathsDelta:#,##0})</div></div>
+    </div>
+</div>
+";
 
-    IEnumerable<StatPoint> GetStatPoint(IEnumerable<Point> points) =>
-        points
-        .SelectMany(p => new[]
-        {
-            new StatPoint { Stat = Stat.Confirmed, Date = p.Date, Value = p.Confirmed },
-            new StatPoint { Stat = Stat.Deaths, Date = p.Date, Value = p.Deaths },
-            new StatPoint { Stat = Stat.Recovered, Date = p.Date, Value = p.Recovered }
-        });
+    public string Tooltip(StatPoint o) => $"<b>{o.Date}</b><br/>{o.Stat}: {o.Cumulative:#,##0} (+{o.Delta:#,##0})";
 
     private bool showChart = true;
 
     private void Swap() => showChart = !showChart;
-
-    public class Option<T>
-    {
-        public T Value { get; set; }
-    }
-
-    public class Position
-    {
-        public double Lat { get; set; }
-        public double Long { get; set; }
-    }
-
-    public class Point
-    {
-        public LocalDate Date { get; set; }
-
-        public double Confirmed { get; set; }
-        public double Deaths { get; set; }
-        public double Recovered { get; set; }
-    }
-
-    public class TS
-    {
-        public string Country { get; set; }
-
-        public Option<string>
-            Continent { get; set; }
-
-        public Option<Position>
-            Position { get; set; }
-
-        public Point[] Points { get; set; }
-
-        public double Confirmed { get; set; }
-
-        public double Deaths { get; set; }
-
-        public double Recovered { get; set; }
-    }
-
-    public enum Stat
-    {
-        Confirmed,
-        Deaths,
-        Recovered
-    }
-
-    public class StatPoint
-    {
-        public Stat Stat { get; set; }
-
-        public LocalDate Date { get; set; }
-
-        public double Value { get; set; }
-    }
 }

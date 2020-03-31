@@ -1,0 +1,27 @@
+﻿@namespace GGNet.Site.Pages
+@layout DocumentationLayout
+@page "/documentation/policy"
+
+<h1>Render Policy</h1>
+
+<p>Policies control components behaviour on <a href="https://docs.microsoft.com/en-gb/aspnet/core/blazor/lifecycle?view=aspnetcore-3.1#suppress-ui-refreshing">UI refresh</a> to fit your use case.</p>
+
+<dl class="row ml-auto mr-auto">
+
+    <dt class="col-sm-2">Never</dt>
+    <dd class="col-sm-10">By default, plots are immutable and render only once.</dd>
+
+    <dt class="col-sm-2">Auto</dt>
+    <dd class="col-sm-10">Plots only refresh when <span class="func">plot.RefreshAsync</span> is invoked by the user after an update of the source or plot property. </dd>
+
+    <dt class="col-sm-2">Always</dt>
+    <dd class="col-sm-10">No control is applied, Blazor engine is in charge.</dd>
+
+</dl>
+
+<div class="border rounded-lg bg-light p-3 m-3">
+<pre class="html">
+<span class="pl-kos">&lt;</span><span class="pl-ent">Plot</span> <span class="pl-c1">Data</span>=<span class="pl-s">&#64;data</span> <span class="pl-c1">T</span>="<span class="pl-s">T</span>" <span class="pl-c1">TX</span>="<span class="pl-s">TX</span>" <span class="pl-c1">TY</span>="<span class="pl-s">TY</span>" <span class="pl-c1">RenderPolicy</span>="<span class="pl-s">...</span>" <span class="pl-c1">@@ref</span>="<span class="pl-s">@@plot</span> /&gt;
+<span class="pl-kos">&lt;</span><span class="pl-ent">SparkLine</span> <span class="pl-c1">Data</span>=<span class="pl-s">&#64;data</span> <span class="pl-c1">T</span>="<span class="pl-s">T</span>" <span class="pl-c1">TX</span>="<span class="pl-s">TX</span>" <span class="pl-c1">TY</span>="<span class="pl-s">TY</span>" <span class="pl-c1">RenderPolicy</span>="<span class="pl-s">...</span>" <span class="pl-c1">@@ref</span>="<span class="pl-s">@@plot</span> /&gt;
+</pre>
+</div>

@@ -2,6 +2,7 @@
 @page "/examples/ridgeline"
 
 @using GGNet
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -36,7 +37,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@probability T="GGNet.Datasets.Probability.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@probability T=Probability.Point TX=Double TY=Double />
                 </div>
             </div>
         </div>
@@ -44,20 +45,20 @@
 
 @code {
 
-    Data<GGNet.Datasets.Probability.Point, double, double> probability;
+    Data<Probability.Point, double, double> probability;
 
     protected override void OnInitialized()
     {
-        var data = GGNet.Datasets.Probability.Load();
+        var data = Probability.Load();
 
-        var source = new GGNet.Source<GGNet.Datasets.Probability.Point>(data);
+        var source = new GGNet.Source<Probability.Point>(data);
 
         var hmax = data.Max(o => o.Density);
 
         probability = Plot.New(source, x: o => o.X, y: o => o.Level)
             .Geom_RidgeLine(height: o => 2.5 * o.Density / hmax, alpha: 0.7)
             .Scale_X_Continuous(limits: (0, 100), expand: (0, 5, 0, 5))
-            .Scale_Y_Discrete(formatter: GGNet.Datasets.Probability.Labeller)
+            .Scale_Y_Discrete(formatter: Probability.Labeller)
             .Scale_Fill_Discrete(o => o.Level, Colors.Viridis, guide: false)
             .Title("Perceptions of Probabilities")
             .YLab("Assigned Probability (%)")

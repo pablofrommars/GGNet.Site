@@ -2,6 +2,7 @@
 @page "/examples/linechart"
 
 @using GGNet
+@using GGNet.Datasets
 
     <div class="container-fluid mt-4">
 
@@ -36,7 +37,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@beatles2 T="GGNet.Datasets.Beatles.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@beatles2 T=Beatles.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -45,15 +46,15 @@
 
 @code {
 
-    Data<GGNet.Datasets.Beatles.Point, double, double> beatles2;
+    Data<Beatles.Point, double, double> beatles2;
 
     protected override void OnInitialized()
     {
-        var source = new GGNet.Source<GGNet.Datasets.Beatles.Point>(GGNet.Datasets.Beatles.Load().Where(o => o.Year >= 1984));
+        var source = new Source<Beatles.Point>(Beatles.Load().Where(o => o.Year >= 1984));
 
         beatles2 = Plot.New(source, x: o => o.Year, y: o => o.N)
             .Geom_Line(width: 2.0)
-            .Scale_Color_Discrete(o => o.Name, GGNet.Colors.Ipsum, guide: true)
+            .Scale_Color_Discrete(o => o.Name, Colors.Ipsum, guide: true)
             .Scale_LineType_Discrete(o => o.Name, guide: false)
             .Title("Popularity of Beatles Names Since 1984")
             .YLab("#")

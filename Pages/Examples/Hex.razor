@@ -48,7 +48,6 @@
 
     protected override void OnInitialized()
     {
-
         diamond = Plot.New(Diamond.Load(), x: o => o.Carat, y: o => o.Price)
             .Geom_Hex(dx: o => o.Dx, dy: o => o.Dy)
             .Title("Prices of 50,000 round cut diamonds")

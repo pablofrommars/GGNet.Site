@@ -2,6 +2,8 @@
 @page "/examples/scatterplot"
 
 @using GGNet
+@using GGNet.Datasets
+@using GGNet.Elements
 
     <div class="container-fluid mt-4">
 
@@ -14,7 +16,7 @@
 <Code>
 <CSharp>
 <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">SepalLength</span>, <span class="pl-smi">y</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">SepalWidth</span>)
-    .<span class="pl-en">Geom_Point</span>()
+    .<span class="pl-en">Geom_Point</span>(<span class="pl-smi">tooltip</span>: <span class="pl-smi">Tooltip</span>, <span class="pl-smi">animation</span>: true)
     .<span class="pl-en">Scale_Color_Discrete</span>(<span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Species</span>, <span class="pl-smi">Colors</span>.<span class="pl-smi">Viridis</span>, <span class="pl-smi">name</span>: <span class="pl-s"><span class="pl-pds">"</span>Species<span class="pl-pds">"</span></span>)
     .<span class="pl-en">Title</span>(<span class="pl-s"><span class="pl-pds">"</span>Fisher's Iris<span class="pl-pds">"</span></span>)
     .<span class="pl-en">XLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Sepal Lenght (cm)<span class="pl-pds">"</span></span>)
@@ -36,7 +38,7 @@
 
             <div class="col-md-6">
                 <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@iris T="GGNet.Datasets.Iris.Point" TX="Double" TY="Double" />
+                    <GGNet.Components.Plot Data=@iris T=Iris.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -49,12 +51,31 @@
 
     protected override void OnInitialized()
     {
-        iris = GGNet.Plot.New(GGNet.Datasets.Iris.Load(), x: o => o.SepalLength, y: o => o.SepalWidth)
+        var theme = Theme.Default(dark: false);
+
+        theme.Tooltip.Margin = new Margin();
+        theme.Tooltip.Background = "#FFFFFF";
+        theme.Tooltip.Alpha = 1.0;
+        theme.Tooltip.Text.Color = "#000000";
+
+        iris = Plot.New(Iris.Load(), x: o => o.SepalLength, y: o => o.SepalWidth)
             .Title("Fisher's Iris")
-            .Geom_Point()
+            .Geom_Point(tooltip: Tooltip, animation: true)
             .XLab("Sepal Lenght (cm)")
-            .Scale_Color_Discrete(o => o.Species, GGNet.Colors.Viridis, name: "Species")
+            .Scale_Color_Discrete(o => o.Species, Colors.Viridis, name: "Species")
             .YLab("Sepal Width (cm)")
-            .Theme(dark: false);
+            .Theme(theme);
     }
+
+    public string Tooltip(Iris.Point o) =>
+$@"
+<div class=""border rounded"" style=""padding: 5px 10px;"">
+    <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{o.Species}</div>
+    <div class=""text-nowrap"">
+        <div class=""d-inline-block""><div class=""text-center"">&nbsp;</div><div class=""text-center font-weight-bold"">Width</div><div class=""text-center font-weight-bold"">Lenght</div></div>
+        <div class=""d-inline-block""><div class=""text-right font-weight-bold"">Petal</div><div class=""text-right"""">{o.PetalWidth}</div><div class=""text-right"">{o.PetalLength}</div></div>
+        <div class=""d-inline-block""><div class=""text-right font-weight-bold"">Sepal</div><div class=""text-right"""">{o.SepalWidth}</div><div class=""text-right"">{o.SepalLength}</div></div>
+    </div>
+</div>
+";
 }
