@@ -22,7 +22,7 @@ else
         <div class="col-md-6 col-lg-6 h-100 m-0 p-0 d-flex flex-column">
             <div class="flex-grow-0 flex-md-shrink-1 pl-5">
                 <h2>2019–20 coronavirus pandemic</h2>
-                <p>Data Source: <a href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports"> World Health Organization - Situation Reports</a></p>
+                <p>Data Source: <a href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases">European Center for Disease Prevention and Control (ECDC)</a></p>
             </div>
             <div class="flex-grow-0 flex-md-shrink-1">
                 <div style="height: 0; padding-bottom: calc(360 / 720 * 100%);">
@@ -33,15 +33,18 @@ else
             <div class="position-relative d-flex flex-grow-1 flex-shrink-1">
                 <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
                     <div class="d-flex flex-column" style="min-height: 0;">
-                        <div class="pt-3" style="overflow-x: hidden; overflow-y: auto;">
-                            <Table Loader=@(() => Loader.Data(data)) Context="p" Small=true OnRowClick=@((TS o) => OnClick(o))>
+                        <div class="pt-3" style="overflow-x: hidden; overflow-y: auto; font-size: 0.75em;">
+                            <Table Loader=@(() => Loader.Data(data)) Context="p" Sort="-1" Small=true OnRowClick=@((TS o) => OnClick(o))>
                                 <Loading><p>Loading...</p></Loading>
                                 <Header>
                                     <Column Field="Name" Label="Country" Sortable=true />
-                                    <Column Field="ConfirmedCumulative" Label="Confirmed" Sortable=true />
+                                    <Column Field="ConfirmedCumulative" Label="Confirmed" Sortable=true Sort="-1" />
                                     <Column Field="ConfirmedDelta" Label="&Delta;" Sortable=true />
+                                    <Column Field="ConfirmedDoubleDays" Label="x2" Sortable=true />
                                     <Column Field="DeathsCumulative" Label="Deaths" Sortable="true" />
                                     <Column Field="DeathsDelta" Label="&Delta;" Sortable=true />
+                                    <Column Field="DeathsDoubleDays" Label="x2" Sortable=true />
+                                    <Column Field="CFR" Sortable=true Tooltip="<b>Case Fatality Rate</b><br/>Deaths to Confirmed cases ratio" TooltipPlacement="left" />
                                 </Header>
                                 <Row>
 
@@ -51,41 +54,45 @@ else
 
                                     <Cell>@(p.Country.Name)</Cell>
 
-                                    <Cell Align=Align.Right>
+                                    <Cell Align=Align.Left>
                                         <div class="row text-center">
-                                            <div class="col">
+                                            <div class="col flex-grow-0 pr-1">
                                                 <div style="width: 75px; height: 25px;">
                                                     <GGNet.Components.SparkLine Data=@confirmed T=TS.Point TX=LocalDate TY=Double />
                                                 </div>
                                             </div>
-                                            <div class="col" style="font-size: 0.75em;">
+                                            <div class="col flex-grow-0 p-0 my-auto">
                                                 @($"{p.ConfirmedCumulative:#,##0}")
                                             </div>
                                         </div>
-
                                     </Cell>
-                                    <Cell Align=Align.Right>
-                                        <div style="font-size: 0.75em;">
-                                            +@($"{p.ConfirmedDelta:#,##0}")
-                                        </div>
+                                    <Cell Align=Align.Left>
+                                        +@($"{p.ConfirmedDelta:#,##0}")
                                     </Cell>
-                                    <Cell Align=Align.Right>
+                                    <Cell Align=Align.Left>
+                                        @(p.ConfirmedDoubleDays > 0 ? $"{p.ConfirmedDoubleDays:#,##0} Days" : "")
+                                    </Cell>
+                                    <Cell Align=Align.Left>
                                         <div class="row text-center">
-                                            <div class="col">
+                                            <div class="col flex-grow-0 pr-1">
                                                 <div style="width: 75px; height: 25px;">
                                                     <GGNet.Components.SparkLine Data=@deaths T=TS.Point TX=LocalDate TY=Double />
                                                 </div>
                                             </div>
-                                            <div class="col" style="font-size: 0.75em;">
+                                            <div class="col flex-grow-0 p-0 my-auto">
                                                 @($"{p.DeathsCumulative:#,##0}")
                                             </div>
                                         </div>
 
                                     </Cell>
-                                    <Cell Align=Align.Right>
-                                        <div style="font-size: 0.75em;">
-                                            +@($"{p.DeathsDelta:#,##0}")
-                                        </div>
+                                    <Cell Align=Align.Left>
+                                        +@($"{p.DeathsDelta:#,##0}")
+                                    </Cell>
+                                    <Cell Align=Align.Left>
+                                        @(p.DeathsDoubleDays > 0 ? $"{p.DeathsDoubleDays:#,##0} Days" : "")
+                                    </Cell>
+                                    <Cell Align=Align.Left>
+                                        @($"{p.CFR:P2}")
                                     </Cell>
                                 </Row>
                             </Table>
@@ -110,37 +117,131 @@ else
                 <div class="card-body d-flex p-0">
                     <div class="tab-content d-flex flex-grow-1">
 
-                        <div class="tab-pane @(showChart ? "active" : "") flex-grow-1">
-                            <div class="h-100 mx-auto mt-3" style="width: 95%;">
-                                <GGNet.Components.Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto @ref=@statPlot />
-                            </div>
+                        <div class="tab-pane @(showChart ? "active d-flex flex-grow-1 flex-column" : "")">
+                                <div class="row flex-grow-0 mt-2 mx-0">
+                                    <div class="col w-100 px-3">
+                                        <h4>@ts.Name</h4>
+                                    </div>
+                                </div>
+                                <div class="row mt-2 flex-grow-0 m-0 px-0">
+                                    <div class="col d-flex w-100">
+                                        @if (ts.ConfirmedDouble != null)
+                                        {
+                                            <div class="card m-0 covid">
+                                                <div class="card-body p-2">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <h6 class="text-uppercase text-muted mb-2">
+                                                                Confirmed Double
+                                                            </h6>
+
+                                                            <span class="h5 mb-0">
+                                                                @ts.ConfirmedDouble.Days Days
+                                                            </span>
+
+                                                            <span class="badge badge-pill mt-n1" style="background-color: var(--confirmed-color); color: #FFFFFF">X @($"{ts.ConfirmedDouble.Rate:N1}")</span>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="h5 text-muted fas fa-virus"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (ts.DeathsDouble != null)
+                                        {
+                                            <div class="card m-0 covid">
+                                                <div class="card-body p-2">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <h6 class="text-uppercase text-muted mb-2">
+                                                                Deaths Double
+                                                            </h6>
+
+                                                            <span class="h5 mb-0">
+                                                                @ts.DeathsDouble.Days Days
+                                                            </span>
+
+                                                            <span class="badge badge-pill mt-n1" style="background-color: var(--deaths-color); color: #FFFFFF">X @($"{ts.DeathsDouble.Rate:N1}")</span>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="h5 text-muted fas fa-skull-crossbones"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (ts.Population > 0)
+                                        {
+                                            <div class="card m-0 covid">
+                                                <div class="card-body p-2">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <h6 class="text-uppercase text-muted mb-2">
+                                                                Per Million
+                                                            </h6>
+                                                            @{
+                                                                var proportionConfirmed = ts.ConfirmedCumulative / ts.Population * 1000000.0;
+                                                                var proportionDeaths = ts.DeathsCumulative / ts.Population * 1000000.0;
+                                                            }
+                                                            <span class="h5 mb-0" style="color: var(--confirmed-color)">
+                                                                @(proportionConfirmed >= 0.01 ? $"{proportionConfirmed:N2}" : "< 0.01")
+                                                            </span>
+                                                            <span class="h5">/</span>
+                                                            <span class="h5 mb-0" style="color: var(--deaths-color)">
+                                                                @(proportionDeaths >= 0.01 ? $"{proportionDeaths:N2}" : "< 0.01")
+                                                            </span>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="h5 text-muted fas fa-user-friends"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </div>
+                                </div>
+                                <div class="row mt-2 flex-fill w-100 m-0 px-0">
+                                    <div class="col d-flex w-100">
+                                        <div class="my-auto mx-auto flex-grow-1 p-2 border rounded">
+                                            <GGNet.Components.Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width="720" Height="400" @ref=@statPlot />
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
 
-                        <div class="tab-pane @(showChart ? "" : "d-flex flex-grow-1")">
-                            <div class="position-relative d-flex flex-grow-1">
-                                <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
-                                    <div class="d-flex flex-column" style="min-height: 0;">
-                                        <div class="overflow-auto pt-3 mx-auto" style="width: 95%;">
-                                            <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
-                                                <Loading><p>Loading...</p></Loading>
-                                                <Header>
-                                                    <Column Field="Date" Sort="-1"/>
-                                                    <Column Label="Confirmed" />
-                                                    <Column Label="Deaths" />
-                                                </Header>
-                                                <Row>
-                                                    <Cell>@(p.Date)</Cell>
-                                                    <Cell Align=Align.Left>@($"{p.ConfirmedCumulative:#,##0} (+{p.ConfirmedDelta:#,##0})")</Cell>
-                                                    <Cell Align=Align.Left>@($"{p.DeathsCumulative:#,##0} (+{p.DeathsDelta:#,##0})")</Cell>
-                                                </Row>
-                                            </Table>
+                            <div class="tab-pane @(showChart ? "" : "d-flex flex-grow-1")">
+                                <div class="position-relative d-flex flex-grow-1">
+                                    <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
+                                        <div class="d-flex flex-column" style="min-height: 0;">
+                                            <div class="overflow-auto pt-3 mx-auto" style="width: 95%; font-size: 0.75em;">
+                                                <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
+                                                    <Loading><p>Loading...</p></Loading>
+                                                    <Header>
+                                                        <Column Field="Date" Sort="-1" />
+                                                        <Column Label="Confirmed" />
+                                                        <Column Label="&Delta;" />
+                                                        <Column Label="Deaths" />
+                                                        <Column Label="&Delta;" />
+                                                    </Header>
+                                                    <Row>
+                                                        <Cell>@(p.Date)</Cell>
+                                                        <Cell Align=Align.Left>@($"{p.ConfirmedCumulative:#,##0}")</Cell>
+                                                        <Cell Align=Align.Left>@($"+{p.ConfirmedDelta:#,##0}")</Cell>
+                                                        <Cell Align=Align.Left>@($"{p.DeathsCumulative:#,##0}")</Cell>
+                                                        <Cell Align=Align.Left>@($"+{p.DeathsDelta:#,##0}")</Cell>
+                                                    </Row>
+                                                </Table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
@@ -173,11 +274,11 @@ else
             var source = new Source<TS.Point>(ts.Points.TakeLast(15));
 
             var confirmed = Plot.New(source, o => o.Date, o => o.ConfirmedCumulative)
-                .Geom_Bar(tooltip: o => $"{o.ConfirmedCumulative:#,###0}", fill: "#758bd1", alpha: 0.8, animation: true)
+                .Geom_Bar(tooltip: o => $"{o.ConfirmedCumulative:#,###0}", fill: "var(--confirmed-color)", alpha: 0.8, animation: true)
                 .Theme(sparkTheme);
 
             var deaths = Plot.New(source, o => o.Date, o => o.DeathsCumulative)
-                .Geom_Bar(tooltip: o => $"{o.DeathsCumulative:#,###0}", fill: "#d18975", alpha: 0.8, animation: true)
+                .Geom_Bar(tooltip: o => $"{o.DeathsCumulative:#,###0}", fill: "var(--deaths-color)", alpha: 0.8, animation: true)
                 .Theme(sparkTheme);
 
             sparks[ts.Country.A2] = (confirmed, deaths);
@@ -197,8 +298,8 @@ else
         theme.Tooltip.Alpha = 1.0;
         theme.Tooltip.Text.Color = "#000000";
 
-        map = Plot.New(data, o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
-            .Geom_Map(Scale110.Coastline, fill: "grey", alpha: 0.1)
+        map = Plot.New(data.Where(o => o.Name != "World"), o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
+            .Geom_Map(Scale110.Countries, o => o.Polygons, fill: "grey", alpha: 0.1, color: "#FFFFFF", width: 0.5)
             .Geom_Point(onclick: (ts, e) => OnClick(ts), tooltip: Tooltip, color: "#000000", alpha: 0.5, animation: true)
             .Scale_Longitude()
             .Scale_Latitude()
@@ -206,11 +307,11 @@ else
             .Scale_Size_Continuous(o => o.ConfirmedCumulative, range: (1, 12), guide: false)
             .Theme(theme);
 
-        ts = data.Single(o => o.Country.A2 == "CN");
+        ts = data.Single(o => o.Country.Name == "World");
         statPoints = GetStatPoints(ts.Points);
         statSource.Add(statPoints);
 
-        var palette = Discrete<Stat, string>.Enum(new[] { "#758bd1", "#d18975" });
+        var palette = Discrete<Stat, string>.Enum(new[] { "var(--confirmed-color)", "var(--deaths-color)" });
 
         statData = Plot.New(statSource, o => o.Date, o => o.Cumulative)
             .Geom_Bar(y: o => o.Delta, tooltip: Tooltip, alpha: 0.6, position: PositionAdjustment.Stack)
@@ -218,19 +319,18 @@ else
             .Scale_Y_Continuous("#,##0")
             .Scale_Color_Discrete(o => o.Stat, palette)
             .Scale_Fill_Discrete(o => o.Stat, palette, guide: false)
-            .Title("China")
             .Theme(dark: false, legend: GGNet.Position.Bottom);
     }
 
-    public async Task OnClick(TS point)
+    public async Task OnClick(TS ts)
     {
+        this.ts = ts;
+
         statSource.Clear();
         statPoints.Clear();
 
-        statPoints.AddRange(GetStatPoints(point.Points));
+        statPoints.AddRange(GetStatPoints(ts.Points));
         statSource.Add(statPoints);
-
-        statData.Title(point.Country.Name);
 
         StateHasChanged();
 
@@ -242,8 +342,8 @@ $@"
 <div class=""border rounded"" style=""padding: 5px 10px;"">
     <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{ts.Country.Name}</div>
     <div class=""d-flex justify-content-center"">
-        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: #758bd1"">{ts.ConfirmedCumulative:#,##0} (+{ts.ConfirmedDelta:#,##0})</div></div>
-        <div><div class=""text-center"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: #d18975"">{ts.DeathsCumulative:#,##0} (+{ts.DeathsDelta:#,##0})</div></div>
+        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: var(--confirmed-color)"">{ts.ConfirmedCumulative:#,##0} (+{ts.ConfirmedDelta:#,##0})</div></div>
+        <div><div class=""text-center"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: var(--deaths-color)"">{ts.DeathsCumulative:#,##0} (+{ts.DeathsDelta:#,##0})</div></div>
     </div>
 </div>
 ";

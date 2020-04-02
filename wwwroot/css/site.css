@@ -1,4 +1,9 @@
-﻿html, body {
+﻿:root {
+    --confirmed-color: #758bd1;
+    --deaths-color: #d18975;
+}
+
+html, body {
     height: 100%;
     margin: 0;
 }
@@ -37,6 +42,7 @@
         align-items: stretch;
         text-align: right;
         flex: 0 1 auto;
+        font-size: 0.7em;
     }
 
 .documentation-sidebar {
@@ -77,4 +83,8 @@
 .fa-blank::after {
     width: 1em;
     content: '\A0';
+}
+
+.covid:not(:last-child) {
+    margin-right: 1em !important;
 }
