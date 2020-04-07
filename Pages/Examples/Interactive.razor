@@ -46,7 +46,7 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1"  style="background-color: #252A32;">
+                <div class="border rounded-lg p-1 bg-dark">
                     <GGNet.Components.Plot Data=@data T="Point" TX="Double" TY="Double" />
                 </div>
             </div>
@@ -90,12 +90,16 @@
         points.Add(new Point { X = 0.75 * System.Math.PI, Y = System.Math.Sin(0.75 * System.Math.PI) });
         points.Add(new Point { X = 1.0 * System.Math.PI, Y = System.Math.Sin(1.0 * System.Math.PI) });
 
+        var theme = Theme.Default();
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         data = Plot.New(curve, x: o => o.X, y: o => o.Y)
             .Geom_Line()
             .Geom_Point(points, o => o.X, o => o.Y, onclick: OnClick, onmouseover: OnMouseOver, onmouseout: OnMouseOut, animation: true)
             .YLab("Sin(x)")
             .XLab("x")
-            .Theme();
+            .Theme(theme);
     }
 
     public Task OnClick(Point point, MouseEventArgs e)

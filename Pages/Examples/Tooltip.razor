@@ -25,7 +25,7 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1" style="background-color: #252A32;">
+                <div class="border rounded-lg p-1 bg-dark">
                     <GGNet.Components.Plot Data=@cars T=Cars.Point TX=Double TY=Double />
                 </div>
             </div>
@@ -39,11 +39,15 @@
 
     protected override void OnInitialized()
     {
+        var theme = Theme.Default();
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         cars = Plot.New(Cars.Load(), x: o => o.Weight, y: o => o.MPG)
             .Geom_Point(tooltip: o => $"<b>Model:</b> {o.Model}<br/><b>Horse Power:</b> {o.HP}<br/><b>Cylinders:</b> {o.Cylinders}")
             .XLab("Weight (1K lbs)")
             .YLab("Miles/Gallon")
             .Caption("source: Motor Trend")
-            .Theme();
+            .Theme(theme);
     }
 }

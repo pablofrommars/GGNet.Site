@@ -38,7 +38,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="border rounded-lg p-1" style="background-color: #252A32;">
+            <div class="border rounded-lg p-1 bg-dark">
                 <GGNet.Components.Plot Data=@spy T=SPY.Bar TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto @ref="plot" />
             </div>
         </div>
@@ -62,13 +62,17 @@
             source.Add(bars[i++]);
         }
 
+        var theme = Theme.Default(axisY: Position.Right);
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         spy = Plot.New(source, x: o => o.date, y: o => o.close)
             .Title("SPY US Equity")
             .Geom_Area(alpha: 0.3)
             .Scale_X_Discrete_Date(expand: (0, 0, 0, 0))
             .YLab("Close")
             .Caption("Source: Bloomberg")
-            .Theme(axisY: Position.Right);
+            .Theme(theme);
     }
 
     private readonly CancellationTokenSource cancellation = new CancellationTokenSource();

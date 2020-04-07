@@ -29,7 +29,7 @@
 
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1" style="background-color: #252A32;">
+                <div class="border rounded-lg p-1 bg-dark">
                     <GGNet.Components.Plot Data=@tip T="Tip.Point" TX="Tip.Day" TY="Double" />
                 </div>
             </div>
@@ -42,10 +42,14 @@
 
     protected override void OnInitialized()
     {
+        var theme = Theme.Default();
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         tip = Plot.New(Tip.Load(), o => o.Day, o => o.Avg)
             .Geom_ErrorBar(ymin: o => o.Lower, ymax: o => o.Upper, position: PositionAdjustment.Dodge)
             .Scale_Color_Discrete(o => o.Sex, new[] { "#69b3a2", "#404080" })
             .YLab("Tip (%)")
-            .Theme();
+            .Theme(theme);
     }
 }

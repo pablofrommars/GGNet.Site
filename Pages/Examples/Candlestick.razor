@@ -35,7 +35,7 @@
 </Code>
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1" style="background-color: #252A32;">
+                <div class="border rounded-lg p-1 bg-dark">
                     <GGNet.Components.Plot Data=@spy T=IntraDay.Bar TX=LocalDateTime TY=Double />
                 </div>
             </div>
@@ -68,12 +68,16 @@
             });
         }
 
+        var theme = Theme.Default(axisY: Position.Right);
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         spy = GGNet.Plot.New(source, x: o => o.Date)
             .Title("SPY US Equity")
             .Scale_X_Discrete_DateTime()
             .Geom_Candlestick(open: o => o.Open, high: o => o.High, low: o => o.Low, close: o => o.Close)
             .Geom_Line(vwap, x: o => o.Date, y: o => o.Close, color: "#ffec1b", width: 2)
             .Caption("Source: Bloomberg")
-            .Theme(axisY: Position.Right);
+            .Theme(theme);
     }
 }

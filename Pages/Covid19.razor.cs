@@ -81,7 +81,16 @@ namespace GGNet.Site.Pages
                 {
                     var fields = line.Split(',');
 
+                    if (fields.Count() != 10)
+                    {
+                        return default;
+                    }
+
                     var a2 = fields[7];
+                    if (a2 == "UK")
+                    {
+                        a2 = "GB";
+                    }
 
                     var year = int.Parse(fields[3]);
                     var month = int.Parse(fields[2]);
@@ -96,6 +105,7 @@ namespace GGNet.Site.Pages
 
                     return (a2, date, cases, deaths, population);
                 })
+                .Where(o => !string.IsNullOrEmpty(o.a2))
                 .GroupBy(o => o.a2)
                 .Select(g =>
                 {

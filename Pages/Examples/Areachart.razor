@@ -37,7 +37,7 @@
 </Code>
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1" style="background-color: #252A32;">
+                <div class="border rounded-lg p-1 bg-dark">
                     <GGNet.Components.Plot Data=@beatles1 T="Beatles.Point" TX="Double" TY="Double" />
                 </div>
             </div>
@@ -50,14 +50,18 @@
 
     protected override void OnInitialized()
     {
+        var theme = Theme.Default();
+        theme.Plot.Background.Fill = "var(--dark)";
+        theme.Panel.Background.Fill = "var(--dark)";
+
         beatles1 = Plot.New(Beatles.Load(), x: o => o.Year)
             .Geom_Area(y: o => o.N)
-            .Geom_VLine(new[] { 1984 }, o => o, color: "#FFFFFF", lineType: LineType.Dashed)
+            .Geom_VLine(new[] { 1984 }, o => o, o => o.ToString(), color: "#FFFFFF", lineType: LineType.Dashed)
             .Scale_Fill_Discrete(o => o.Name, GGNet.Colors.FT, guide: false)
             .Facet_Wrap(selector: o => o.Name, freeY: true)
             .Title("Popularity of Beatles Names")
             .YLab("#")
             .XLab("Year")
-            .Theme();
+            .Theme(theme);
     }
 }
