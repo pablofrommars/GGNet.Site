@@ -2,6 +2,7 @@
 @page "/examples/choropleth"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 @using GGNet.NaturalEarth
 
@@ -34,8 +35,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1" style="width: 720px; height: 670px;">
-                    <GGNet.Components.Plot Data=@map T="(Country, long)" TX=Double TY=Double Width="720" Height="670" />
+                <div class="border rounded-lg p-1 shadow-sm" style="width: 720px; height: 670px;">
+                    <Plot Data=@map T="(Country, long)" TX=Double TY=Double Width="720" Height="670" />
                 </div>
             </div>
 

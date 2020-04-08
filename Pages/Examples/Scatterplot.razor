@@ -2,6 +2,7 @@
 @page "/examples/scatterplot"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 @using GGNet.Elements
 
@@ -37,8 +38,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@iris T=Iris.Point TX=Double TY=Double />
+                <div class="border rounded-lg p-1 shadow-sm">
+                    <Plot Data=@iris T=Iris.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -47,7 +48,7 @@
 
 @code {
 
-    Data<GGNet.Datasets.Iris.Point, double, double> iris;
+    Data<Iris.Point, double, double> iris;
 
     protected override void OnInitialized()
     {

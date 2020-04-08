@@ -4,6 +4,7 @@
 @using NodaTime
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -47,8 +48,8 @@
 </Code>
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1 bg-dark">
-                    <GGNet.Components.Plot Data=@spy T="SPY.Bar" TX="LocalDate" TY="Double" />
+                <div class="border rounded-lg p-1 bg-dark shadow-sm">
+                    <Plot Data=@spy T="SPY.Bar" TX="LocalDate" TY="Double" />
                 </div>
             </div>
         </div>
@@ -62,10 +63,6 @@
     {
         var source = new Source<SPY.Bar>(SPY.Load().Where(o => o.date.Year >= 2019));
 
-        var theme = Theme.Default(axisY: Position.Right);
-        theme.Plot.Background.Fill = "var(--dark)";
-        theme.Panel.Background.Fill = "var(--dark)";
-
         spy = Plot.New(source, x: o => o.date)
             .Title("SPY US Equity")
             .Scale_X_Discrete_Date()
@@ -76,6 +73,6 @@
             .YLim(0)
             .YLab("Volume(K)"), height: 0.2)
             .Caption("Source: Bloomberg")
-            .Theme(theme);
+            .Theme(axisY: Position.Right);
     }
 }

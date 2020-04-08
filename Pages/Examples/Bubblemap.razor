@@ -2,6 +2,7 @@
 @page "/examples/bubblemap"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 @using GGNet.NaturalEarth
 
@@ -16,8 +17,8 @@
 
     <div class="row m-4">
         <div class="col">
-            <div class="border rounded-lg p-1 w-75 mx-auto" style="">
-                <GGNet.Components.Plot Data=@map T=Surf.Point TX=Double TY=Double Width="720" Height="360" />
+            <div class="border rounded-lg p-1 w-75 mx-auto shadow-sm">
+                <Plot Data=@map T=Surf.Point TX=Double TY=Double Width="720" Height="360" />
             </div>
         </div>
     </div>

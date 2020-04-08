@@ -2,6 +2,7 @@
 @page "/examples/areachart"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -37,8 +38,8 @@
 </Code>
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1 bg-dark">
-                    <GGNet.Components.Plot Data=@beatles1 T="Beatles.Point" TX="Double" TY="Double" />
+                <div class="border rounded-lg p-1 bg-dark shadow-sm">
+                    <Plot Data=@beatles1 T="Beatles.Point" TX="Double" TY="Double" />
                 </div>
             </div>
         </div>
@@ -50,10 +51,6 @@
 
     protected override void OnInitialized()
     {
-        var theme = Theme.Default();
-        theme.Plot.Background.Fill = "var(--dark)";
-        theme.Panel.Background.Fill = "var(--dark)";
-
         beatles1 = Plot.New(Beatles.Load(), x: o => o.Year)
             .Geom_Area(y: o => o.N)
             .Geom_VLine(new[] { 1984 }, o => o, o => o.ToString(), color: "#FFFFFF", lineType: LineType.Dashed)
@@ -62,6 +59,6 @@
             .Title("Popularity of Beatles Names")
             .YLab("#")
             .XLab("Year")
-            .Theme(theme);
+            .Theme();
     }
 }

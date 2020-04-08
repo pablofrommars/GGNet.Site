@@ -2,6 +2,7 @@
 @page "/examples/interactivity"
 
 @using GGNet
+@using GGNet.Components
 
     <div class="container-fluid mt-4">
 
@@ -12,7 +13,7 @@
                 <p>Geom interaction through events</p>
                 <p><b>OnMouseOver:</b> @hover</p>
                 <p><b>OnClick:</b> @clicked</p>
-                <div class="border rounded-lg p-3 mt-3">
+                <div class="border rounded-lg p-3 mt-3 shadow-sm">
                     <pre class="csharp">
 <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">X</span>, <span class="pl-smi">y</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Y</span>)
     .<span class="pl-en">Geom_Line</span>()
@@ -46,8 +47,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1 bg-dark">
-                    <GGNet.Components.Plot Data=@data T="Point" TX="Double" TY="Double" />
+                <div class="border rounded-lg p-1 bg-dark shadow-sm">
+                    <Plot Data=@data T="Point" TX="Double" TY="Double" />
                 </div>
             </div>
 
@@ -90,16 +91,12 @@
         points.Add(new Point { X = 0.75 * System.Math.PI, Y = System.Math.Sin(0.75 * System.Math.PI) });
         points.Add(new Point { X = 1.0 * System.Math.PI, Y = System.Math.Sin(1.0 * System.Math.PI) });
 
-        var theme = Theme.Default();
-        theme.Plot.Background.Fill = "var(--dark)";
-        theme.Panel.Background.Fill = "var(--dark)";
-
         data = Plot.New(curve, x: o => o.X, y: o => o.Y)
             .Geom_Line()
             .Geom_Point(points, o => o.X, o => o.Y, onclick: OnClick, onmouseover: OnMouseOver, onmouseout: OnMouseOut, animation: true)
             .YLab("Sin(x)")
             .XLab("x")
-            .Theme(theme);
+            .Theme();
     }
 
     public Task OnClick(Point point, MouseEventArgs e)

@@ -4,6 +4,7 @@
 @using NodaTime
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -35,8 +36,8 @@
 </Code>
             </div>
             <div class="col-md-6">
-                <div class="border rounded-lg p-1 bg-dark">
-                    <GGNet.Components.Plot Data=@spy T=IntraDay.Bar TX=LocalDateTime TY=Double />
+                <div class="border rounded-lg p-1 bg-dark shadow-sm">
+                    <Plot Data=@spy T=IntraDay.Bar TX=LocalDateTime TY=Double />
                 </div>
             </div>
         </div>
@@ -68,16 +69,12 @@
             });
         }
 
-        var theme = Theme.Default(axisY: Position.Right);
-        theme.Plot.Background.Fill = "var(--dark)";
-        theme.Panel.Background.Fill = "var(--dark)";
-
-        spy = GGNet.Plot.New(source, x: o => o.Date)
+        spy = Plot.New(source, x: o => o.Date)
             .Title("SPY US Equity")
             .Scale_X_Discrete_DateTime()
             .Geom_Candlestick(open: o => o.Open, high: o => o.High, low: o => o.Low, close: o => o.Close)
             .Geom_Line(vwap, x: o => o.Date, y: o => o.Close, color: "#ffec1b", width: 2)
             .Caption("Source: Bloomberg")
-            .Theme(theme);
+            .Theme(axisY: Position.Right);
     }
 }

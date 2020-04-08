@@ -1,356 +1,267 @@
 ﻿@page "/covid19"
 
-@inject HttpClient Http
+@using NodaTime 
 
-@using NodaTime
-
-@using GGNet
-@using GGNet.Palettes
-@using GGNet.Elements
-@using GGNet.NaturalEarth
+@using GGNet.Components
 
 @using Table.Net 
 
-@if (data == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row h-100 w-100 m-0 p-0">
+@using Data
 
-        <div class="col-md-6 col-lg-6 h-100 m-0 p-0 d-flex flex-column">
-            <div class="flex-grow-0 flex-md-shrink-1 pl-5">
-                <h2>2019–20 coronavirus pandemic</h2>
-                <p>Data Source: <a href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases">European Center for Disease Prevention and Control (ECDC)</a></p>
-            </div>
-            <div class="flex-grow-0 flex-md-shrink-1">
-                <div style="height: 0; padding-bottom: calc(360 / 720 * 100%);">
-                    <GGNet.Components.Plot Data=@map T=TS TX=Double TY=Double Width=720 Height=360 />
+@inject Covid19Service Service
+
+<div class="row flex-fill mx-0">
+
+    <!-- Side Menu -->
+    <div class="col-auto px-0 pt-2 bg-light border-right">
+        <ul class="list-unstyled h3">
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 0)><a class="px-3 @(sideMenuItem != 0 ? "text-secondary" : "")"><i class="fas fa-fw fa-globe-europe"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 1)><a class="px-3 @(sideMenuItem != 1 ? "text-secondary" : "")"><i class="fas fa-fw fa-lungs-virus"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 2)><a class="px-3 @(sideMenuItem != 2 ? "text-secondary" : "")"><i class="fas fa-fw fa-birthday-cake"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 3)><a class="px-3 @(sideMenuItem != 3 ? "text-secondary" : "")"><i class="fas fa-fw fa-hand-holding-medical"></i></a></li>
+        </ul>
+    </div>
+
+    <!-- Content -->
+    <div class="col d-flex">
+
+        @if (data == null)
+        {
+            <div class="m-auto">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
                 </div>
             </div>
+        }
+        else
+        {
+            <!-- Main -->
+            <div class="row flex-fill @(sideMenuItem != 0 ? "d-none" : "")">
 
-            <div class="position-relative d-flex flex-grow-1 flex-shrink-1">
-                <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
-                    <div class="d-flex flex-column" style="min-height: 0;">
-                        <div class="pt-3" style="overflow-x: hidden; overflow-y: auto; font-size: 0.75em;">
-                            <Table Loader=@(() => Loader.Data(data)) Context="p" Sort="-1" Small=true OnRowClick=@((TS o) => OnClick(o))>
-                                <Loading><p>Loading...</p></Loading>
-                                <Header>
-                                    <Column Field="Name" Label="Country" Sortable=true />
-                                    <Column Field="ConfirmedCumulative" Label="Confirmed" Sortable=true Sort="-1" />
-                                    <Column Field="ConfirmedDelta" Label="&Delta;" Sortable=true />
-                                    <Column Field="ConfirmedDoubleDays" Label="x2" Sortable=true />
-                                    <Column Field="DeathsCumulative" Label="Deaths" Sortable="true" />
-                                    <Column Field="DeathsDelta" Label="&Delta;" Sortable=true />
-                                    <Column Field="DeathsDoubleDays" Label="x2" Sortable=true />
-                                    <Column Field="CFR" Sortable=true Tooltip="<b>Case Fatality Rate</b><br/>Deaths to Confirmed cases ratio" TooltipPlacement="left" />
-                                </Header>
-                                <Row>
+                <!-- Main Left -->
+                <div class="col-6 px-0 d-flex flex-column border-right">
+                    <div class="pl-5">
+                        <h3>2019–20 coronavirus pandemic</h3>
+                        <p class="fa-xs">Data Source: <a href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases">European Center for Disease Prevention and Control (ECDC)</a></p>
+                    </div>
 
-                                    @{
-                                            var (confirmed, deaths) = sparks[p.Country.A2];
-                                    }
+                    <div class="">
+                        <div style="height: 0; padding-bottom: calc(360 / 720 * 100%);">
+                            <Plot Data=@map T=TS TX=Double TY=Double Width=720 Height=360 />
+                        </div>
+                    </div>
 
-                                    <Cell>@(p.Country.Name)</Cell>
+                    <div class="flex-fill mt-2">
+                        <div class="position-relative h-100 overflow-auto">
+                            <div class="position-absolute w-100 fa-xs">
+                                <Table Loader=@(() => Loader.Data(data)) Context="p" Sort="-1" Small=true OnRowClick=@((TS o) => OnClick(o))>
+                                    <Loading><p>Loading...</p></Loading>
+                                    <Header>
+                                        <Column Field="Name" Label="Country" Sortable=true />
+                                        <Column Field="ConfirmedCumulative" Label="Confirmed" Sortable=true Sort="-1" />
+                                        <Column Field="ConfirmedDelta" Label="&Delta;" Sortable=true />
+                                        <Column Field="ConfirmedDoubleDays" Label="x2" Sortable=true />
+                                        <Column Field="DeathsCumulative" Label="Deaths" Sortable="true" />
+                                        <Column Field="DeathsDelta" Label="&Delta;" Sortable=true />
+                                        <Column Field="DeathsDoubleDays" Label="x2" Sortable=true />
+                                        <Column Field="CFR" Sortable=true Tooltip="<b>Case Fatality Rate</b><br/>Deaths to Confirmed cases ratio" TooltipPlacement="left" />
+                                    </Header>
+                                    <Row>
 
-                                    <Cell Align=Align.Left>
-                                        <div class="row text-center">
-                                            <div class="col flex-grow-0 pr-1">
-                                                <div style="width: 75px; height: 25px;">
-                                                    <GGNet.Components.SparkLine Data=@confirmed T=TS.Point TX=LocalDate TY=Double />
+                                        @{
+                                                var (confirmed, deaths) = sparks[p.Country.A2];
+                                        }
+
+                                        <Cell>@(p.Country.Name)</Cell>
+
+                                        <Cell Align=Align.Left>
+                                            <div class="row text-center">
+                                                <div class="col flex-grow-0 pr-1">
+                                                    <div style="width: 75px; height: 25px;">
+                                                        <GGNet.Components.SparkLine Data=@confirmed T=TS.Point TX=LocalDate TY=Double />
+                                                    </div>
+                                                </div>
+                                                <div class="col flex-grow-0 p-0 my-auto">
+                                                    @($"{p.ConfirmedCumulative:#,##0}")
                                                 </div>
                                             </div>
-                                            <div class="col flex-grow-0 p-0 my-auto">
-                                                @($"{p.ConfirmedCumulative:#,##0}")
-                                            </div>
-                                        </div>
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        +@($"{p.ConfirmedDelta:#,##0}")
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        @(p.ConfirmedDoubleDays > 0 ? $"{p.ConfirmedDoubleDays:#,##0} Days" : "")
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        <div class="row text-center">
-                                            <div class="col flex-grow-0 pr-1">
-                                                <div style="width: 75px; height: 25px;">
-                                                    <GGNet.Components.SparkLine Data=@deaths T=TS.Point TX=LocalDate TY=Double />
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            +@($"{p.ConfirmedDelta:#,##0}")
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            @(p.ConfirmedDoubleDays > 0 ? $"{p.ConfirmedDoubleDays:#,##0} Days" : "")
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            <div class="row text-center">
+                                                <div class="col flex-grow-0 pr-1">
+                                                    <div style="width: 75px; height: 25px;">
+                                                        <GGNet.Components.SparkLine Data=@deaths T=TS.Point TX=LocalDate TY=Double />
+                                                    </div>
+                                                </div>
+                                                <div class="col flex-grow-0 p-0 my-auto">
+                                                    @($"{p.DeathsCumulative:#,##0}")
                                                 </div>
                                             </div>
-                                            <div class="col flex-grow-0 p-0 my-auto">
-                                                @($"{p.DeathsCumulative:#,##0}")
-                                            </div>
-                                        </div>
 
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        +@($"{p.DeathsDelta:#,##0}")
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        @(p.DeathsDoubleDays > 0 ? $"{p.DeathsDoubleDays:#,##0} Days" : "")
-                                    </Cell>
-                                    <Cell Align=Align.Left>
-                                        @($"{p.CFR:P2}")
-                                    </Cell>
-                                </Row>
-                            </Table>
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            +@($"{p.DeathsDelta:#,##0}")
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            @(p.DeathsDoubleDays > 0 ? $"{p.DeathsDoubleDays:#,##0} Days" : "")
+                                        </Cell>
+                                        <Cell Align=Align.Left>
+                                            @($"{p.CFR:P2}")
+                                        </Cell>
+                                    </Row>
+                                </Table>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 col-lg-6 h-100 m-0 p-0 d-flex flex-column">
-            <div class="card w-100 h-100 border-top-0 border-right-0 border-bottom-0 rounded-0 header-u">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link @(showChart ? "active" : "")" href="" @onclick=Swap><i class="fas fa-xs fa-chart-line mr-1"></i>Chart</a>
+                <!-- Main Right -->
+                <div class="col-6 px-0 d-flex flex-column">
+
+                    <ul class="nav nav-u">
+                        <li class="nav-item cursor-pointer" @onclick=@(() => mainMenuItem = 0)>
+                            <a class="nav-link @(mainMenuItem == 0 ? "active" : "")"><i class="fas fa-xs fa-chart-line mr-1"></i>Chart</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(showChart ? "" : "active")" href="" @onclick=Swap><i class="fas fa-xs fa-table mr-1"></i>Data</a>
+                        <li class="nav-item cursor-pointer" @onclick=@(() => mainMenuItem = 1)>
+                            <a class="nav-link @(mainMenuItem == 1 ? "active" : "")"><i class="fas fa-xs fa-table mr-1"></i>Data</a>
                         </li>
                     </ul>
-                </div>
-                <div class="card-body d-flex p-0">
-                    <div class="tab-content d-flex flex-grow-1">
 
-                        <div class="tab-pane @(showChart ? "active d-flex flex-grow-1 flex-column" : "")">
-                                <div class="row flex-grow-0 mt-2 mx-0">
-                                    <div class="col w-100 mt-2 px-3">
-                                        <h4>@ts.Name</h4>
-                                    </div>
-                                </div>
-                                <div class="row mt-2 flex-grow-0 m-0 px-0">
-                                    <div class="col d-flex w-100">
-                                        @if (ts.ConfirmedDouble != null)
-                                        {
-                                            <div class="card m-0 covid shadow-sm">
-                                                <div class="card-body p-2">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <h6 class="text-uppercase text-muted mb-2">
-                                                                Confirmed Double
-                                                            </h6>
+                    <!-- Main Right Chart -->
 
-                                                            <span class="h5 mb-0">
-                                                                @ts.ConfirmedDouble.Days Days
-                                                            </span>
+                    <div class="@(mainMenuItem == 0 ? "flex-fill d-flex flex-column" : "d-none") p-3">
 
-                                                            <span class="badge badge-pill mt-n1" style="background-color: var(--confirmed-color); color: #FFFFFF">X @($"{ts.ConfirmedDouble.Rate:N1}")</span>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="h5 text-muted fas fa-virus"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                        <h4 class="mb-3">@ts.Name</h4>
+
+                        <div class="d-flex">
+                            @if (ts.ConfirmedDouble != null)
+                            {
+                                <div class="card m-0 covid shadow-sm">
+                                    <div class="card-body p-2">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="text-uppercase text-muted mb-2">
+                                                    Confirmed Double
+                                                </h6>
+
+                                                <span class="h5 mb-0">
+                                                    @ts.ConfirmedDouble.Days Days
+                                                </span>
+
+                                                <span class="badge badge-pill mt-n1" style="background-color: var(--confirmed-color); color: #FFFFFF">X @($"{ts.ConfirmedDouble.Rate:N1}")</span>
                                             </div>
-                                        }
-
-                                        @if (ts.DeathsDouble != null)
-                                        {
-                                            <div class="card m-0 covid shadow-sm">
-                                                <div class="card-body p-2">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <h6 class="text-uppercase text-muted mb-2">
-                                                                Deaths Double
-                                                            </h6>
-
-                                                            <span class="h5 mb-0">
-                                                                @ts.DeathsDouble.Days Days
-                                                            </span>
-
-                                                            <span class="badge badge-pill mt-n1" style="background-color: var(--deaths-color); color: #FFFFFF">X @($"{ts.DeathsDouble.Rate:N1}")</span>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="h5 text-muted fas fa-skull-crossbones"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            <div class="col-auto">
+                                                <i class="h5 text-muted fas fa-virus"></i>
                                             </div>
-                                        }
-
-                                        @if (ts.Population > 0)
-                                        {
-                                            <div class="card m-0 covid shadow-sm">
-                                                <div class="card-body p-2">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <h6 class="text-uppercase text-muted mb-2">
-                                                                Per Million
-                                                            </h6>
-                                                            @{
-                                                                var proportionConfirmed = ts.ConfirmedCumulative / ts.Population * 1000000.0;
-                                                                var proportionDeaths = ts.DeathsCumulative / ts.Population * 1000000.0;
-                                                            }
-                                                            <span class="h5 mb-0" style="color: var(--confirmed-color)">
-                                                                @(proportionConfirmed >= 0.01 ? $"{proportionConfirmed:N2}" : "< 0.01")
-                                                            </span>
-                                                            <span class="h5">/</span>
-                                                            <span class="h5 mb-0" style="color: var(--deaths-color)">
-                                                                @(proportionDeaths >= 0.01 ? $"{proportionDeaths:N2}" : "< 0.01")
-                                                            </span>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="h5 text-muted fas fa-user-friends"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-
-                                    </div>
-                                </div>
-                                <div class="row mt-2 flex-fill w-100 m-0 px-0">
-                                    <div class="col d-flex w-100">
-                                        <div class="my-auto mx-auto flex-grow-1 p-2 border rounded shadow-sm">
-                                            <GGNet.Components.Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width="720" Height="400" @ref=@statPlot />
                                         </div>
                                     </div>
                                 </div>
+                            }
+
+                            @if (ts.DeathsDouble != null)
+                            {
+                                <div class="card m-0 covid shadow-sm">
+                                    <div class="card-body p-2">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="text-uppercase text-muted mb-2">
+                                                    Deaths Double
+                                                </h6>
+
+                                                <span class="h5 mb-0">
+                                                    @ts.DeathsDouble.Days Days
+                                                </span>
+
+                                                <span class="badge badge-pill mt-n1" style="background-color: var(--deaths-color); color: #FFFFFF">X @($"{ts.DeathsDouble.Rate:N1}")</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="h5 text-muted fas fa-skull-crossbones"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (ts.Population > 0)
+                            {
+                                <div class="card m-0 covid shadow-sm">
+                                    <div class="card-body p-2">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="text-uppercase text-muted mb-2">
+                                                    Per Million
+                                                </h6>
+                                                @{
+                                                    var proportionConfirmed = ts.ConfirmedCumulative / ts.Population * 1000000.0;
+                                                    var proportionDeaths = ts.DeathsCumulative / ts.Population * 1000000.0;
+                                                }
+                                                <span class="h5 mb-0" style="color: var(--confirmed-color)">
+                                                    @(proportionConfirmed >= 0.01 ? $"{proportionConfirmed:N2}" : "< 0.01")
+                                                </span>
+                                                <span class="h5">/</span>
+                                                <span class="h5 mb-0" style="color: var(--deaths-color)">
+                                                    @(proportionDeaths >= 0.01 ? $"{proportionDeaths:N2}" : "< 0.01")
+                                                </span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="h5 text-muted fas fa-user-friends"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
                         </div>
-
-                            <div class="tab-pane @(showChart ? "" : "d-flex flex-grow-1")">
-                                <div class="position-relative d-flex flex-grow-1">
-                                    <div class="position-absolute w-100 h-100 d-flex flex-column overflow-hidden">
-                                        <div class="d-flex flex-column" style="min-height: 0;">
-                                            <div class="overflow-auto pt-3 mx-auto" style="width: 95%; font-size: 0.75em;">
-                                                <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
-                                                    <Loading><p>Loading...</p></Loading>
-                                                    <Header>
-                                                        <Column Field="Date" Sort="-1" />
-                                                        <Column Label="Confirmed" />
-                                                        <Column Label="&Delta;" />
-                                                        <Column Label="Deaths" />
-                                                        <Column Label="&Delta;" />
-                                                    </Header>
-                                                    <Row>
-                                                        <Cell>@(p.Date)</Cell>
-                                                        <Cell Align=Align.Left>@($"{p.ConfirmedCumulative:#,##0}")</Cell>
-                                                        <Cell Align=Align.Left>@($"+{p.ConfirmedDelta:#,##0}")</Cell>
-                                                        <Cell Align=Align.Left>@($"{p.DeathsCumulative:#,##0}")</Cell>
-                                                        <Cell Align=Align.Left>@($"+{p.DeathsDelta:#,##0}")</Cell>
-                                                    </Row>
-                                                </Table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="flex-fill d-flex">
+                            <div class="m-auto flex-fill p-2 border rounded shadow-sm">
+                                <Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width="720" Height="400" @ref=@statPlot />
                             </div>
-
                         </div>
+                    </div>
+
+                    <!-- Main Right Data -->
+                    <div class=@(mainMenuItem == 1 ? "flex-fill d-flex flex-column" : "d-none")>
+                        <div class="position-relative h-100 overflow-auto">
+                            <div class="position-absolute w-100 fa-xs">
+                                <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
+                                    <Loading><p>Loading...</p></Loading>
+                                    <Header>
+                                        <Column Field="Date" Sort="-1" />
+                                        <Column Label="Confirmed" />
+                                        <Column Label="&Delta;" />
+                                        <Column Label="Deaths" />
+                                        <Column Label="&Delta;" />
+                                    </Header>
+                                    <Row>
+                                        <Cell>@(p.Date)</Cell>
+                                        <Cell Align=Align.Left>@($"{p.ConfirmedCumulative:#,##0}")</Cell>
+                                        <Cell Align=Align.Left>@($"+{p.ConfirmedDelta:#,##0}")</Cell>
+                                        <Cell Align=Align.Left>@($"{p.DeathsCumulative:#,##0}")</Cell>
+                                        <Cell Align=Align.Left>@($"+{p.DeathsDelta:#,##0}")</Cell>
+                                    </Row>
+                                </Table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
-    </div>
-}
 
-@code {
-    List<TS> data;
-    TS ts;
 
-    Data<TS, double, double> map;
+            <div class="row flex-fill @(sideMenuItem != 1 ? "d-none" : "")">
+                <div class="col px-0 d-flex flex-column">
+                    <div class="w-75 m-auto p-2 border rounded shadow-sm">
+                        <Plot Data=@cfr T=TS TX=Double TY=Double Width="720" Height="400" />
+                    </div>
+                </div>
+            </div>
 
-    List<StatPoint> statPoints;
-    Source<StatPoint> statSource = new Source<StatPoint>();
-    Data<StatPoint, LocalDate, double> statData;
-    GGNet.Components.Plot<StatPoint, LocalDate, double> statPlot;
-
-    Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)> sparks =
-        new Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        data = await GetData();
-
-        var sparkTheme = Theme.Default(dark: false);
-        sparkTheme.Tooltip.Text.Size = new Size { Value = 16, Units = Units.px };
-
-        foreach (var ts in data)
-        {
-            var source = new Source<TS.Point>(ts.Points.TakeLast(15));
-
-            var confirmed = Plot.New(source, o => o.Date, o => o.ConfirmedCumulative)
-                .Geom_Bar(tooltip: o => $"{o.ConfirmedCumulative:#,###0}", fill: "var(--confirmed-color)", alpha: 0.8, animation: true)
-                .Theme(sparkTheme);
-
-            var deaths = Plot.New(source, o => o.Date, o => o.DeathsCumulative)
-                .Geom_Bar(tooltip: o => $"{o.DeathsCumulative:#,###0}", fill: "var(--deaths-color)", alpha: 0.8, animation: true)
-                .Theme(sparkTheme);
-
-            sparks[ts.Country.A2] = (confirmed, deaths);
         }
-
-        data = data.OrderByDescending(o => o.ConfirmedCumulative).ToList();
-
-        var theme = Theme.Default(dark: false);
-
-        theme.Panel.Grid.Major.X.Alpha = 0.25;
-        theme.Panel.Grid.Minor.X.Alpha = 0.25;
-        theme.Panel.Grid.Major.Y.Alpha = 0.25;
-        theme.Panel.Grid.Minor.Y.Alpha = 0.25;
-
-        theme.Tooltip.Margin = new Margin();
-        theme.Tooltip.Background = "#FFFFFF";
-        theme.Tooltip.Alpha = 1.0;
-        theme.Tooltip.Text.Color = "#000000";
-
-        map = Plot.New(data.Where(o => o.Name != "World"), o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
-            .Geom_Map(Scale110.Countries, o => o.Polygons, fill: "grey", alpha: 0.1, color: "#FFFFFF", width: 0.5)
-            .Geom_Point(onclick: (ts, e) => OnClick(ts), tooltip: Tooltip, color: "#000000", alpha: 0.5, animation: true)
-            .Scale_Longitude()
-            .Scale_Latitude()
-            .Scale_Color_Discrete(o => o.Country.Continent, Colors.Viridis, guide: false)
-            .Scale_Size_Continuous(o => o.ConfirmedCumulative, range: (1, 12), guide: false)
-            .Theme(theme);
-
-        ts = data.Single(o => o.Country.Name == "World");
-        statPoints = GetStatPoints(ts.Points);
-        statSource.Add(statPoints);
-
-        var palette = Discrete<Stat, string>.Enum(new[] { "var(--confirmed-color)", "var(--deaths-color)" });
-
-        statData = Plot.New(statSource, o => o.Date, o => o.Cumulative)
-            .Geom_Bar(y: o => o.Delta, tooltip: Tooltip, alpha: 0.6, position: PositionAdjustment.Stack)
-            .Geom_Line(tooltip: Tooltip, width: 3, alpha: 0.8)
-            .Scale_Y_Continuous("#,##0")
-            .Scale_Color_Discrete(o => o.Stat, palette)
-            .Scale_Fill_Discrete(o => o.Stat, palette, guide: false)
-            .Theme(dark: false, legend: GGNet.Position.Bottom);
-    }
-
-    public async Task OnClick(TS ts)
-    {
-        this.ts = ts;
-
-        statSource.Clear();
-        statPoints.Clear();
-
-        statPoints.AddRange(GetStatPoints(ts.Points));
-        statSource.Add(statPoints);
-
-        StateHasChanged();
-
-        await statPlot.RefreshAsync().ConfigureAwait(false);
-    }
-
-    public string Tooltip(TS ts) =>
-$@"
-<div class=""border rounded"" style=""padding: 5px 10px;"">
-    <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{ts.Country.Name}</div>
-    <div class=""d-flex justify-content-center"">
-        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: var(--confirmed-color)"">{ts.ConfirmedCumulative:#,##0} (+{ts.ConfirmedDelta:#,##0})</div></div>
-        <div><div class=""text-center"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: var(--deaths-color)"">{ts.DeathsCumulative:#,##0} (+{ts.DeathsDelta:#,##0})</div></div>
     </div>
 </div>
-";
-
-    public string Tooltip(StatPoint o) => $"<b>{o.Date}</b><br/>{o.Stat}: {o.Cumulative:#,##0} (+{o.Delta:#,##0})";
-
-    private bool showChart = true;
-
-    private void Swap() => showChart = !showChart;
-}

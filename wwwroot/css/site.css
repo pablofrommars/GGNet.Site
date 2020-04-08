@@ -65,7 +65,9 @@ html, body {
                 color: #0056b3;
             }
 
-.examples {
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 .chart-iris {
@@ -89,33 +91,27 @@ html, body {
     margin-right: 1em !important;
 }
 
-.card.header-u {
-
+.nav-u {
+    border-bottom: 2px solid rgba(0, 0, 0, .125);
 }
 
-    .card.header-u .card-header {
-        background-color: inherit;
-        border-bottom: 0px;
-        padding: .5rem 1.25rem
+.nav-u .nav-item {
+    margin-bottom: -2px;
+}
+
+    .nav-u .nav-item .nav-link {
+        border: 0px;
+        padding-top: 0.375rem;
+        padding-bottom: 0.375rem;
+        color: var(--secondary);
     }
 
-        .card.header-u .card-header .card-header-tabs {
-            border-bottom: 2px solid rgba(0, 0, 0, .125);
+        .nav-u .nav-item .nav-link.active {
+            border-bottom: 2px solid var(--blue);
+            color: inherit;
         }
 
-        .card.header-u .card-header .nav-item {
-            margin-bottom: -2px;
-        }
 
-                .card.header-u .card-header .nav-item .nav-link {
-                    border: 0px;
-                    padding-top: 0.375rem;
-                    padding-bottom: 0.375rem;
-                    color: var(--secondary);
-                }
-
-                    .card.header-u .card-header .nav-item .nav-link.active {
-                        border-bottom: 2px solid var(--blue);
-                        color: inherit;
-                    }
-
+.table-net {
+    margin-bottom: 0 !important;
+}

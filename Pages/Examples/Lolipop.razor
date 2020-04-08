@@ -2,6 +2,8 @@
 @page "/examples/lolipop"
 
 @using GGNet
+@using GGNet.Components
+@using GGNet.Formats
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -36,8 +38,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-3">
-                    <GGNet.Components.Plot Data=@weapon T=Weapon.Point TX=Double TY=Double />
+                <div class="border rounded-lg p-3 shadow-sm">
+                    <Plot Data=@weapon T=Weapon.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -64,9 +66,13 @@
             .OrderBy(o => o.Id)
             .ToList();
 
-        var labeller = new Formats.Labeller<double>(data.ToDictionary(o => (double)o.Id, o => o.Country));
+        var labeller = new Labeller<double>(data.ToDictionary(o => (double)o.Id, o => o.Country));
 
-        var source = new GGNet.Source<Weapon.Point>(data);
+        var source = new Source<Weapon.Point>(data);
+
+        var theme = Theme.Default(dark: false);
+        theme.Panel.Grid.Major.Y.Width = 0;
+        theme.Panel.Grid.Minor.Y.Width = 0;
 
         weapon = Plot.New(source, o => o.Value, o => o.Id)
             .Geom_Segment(x: o => 0, xend: o => o.Value, y: o => o.Id, yend: o => o.Id, color: "#808080")
@@ -75,6 +81,6 @@
             .Scale_Y_Discrete(expand: (0.0, 0.5, 0, 0.5), formatter: labeller)
             .XLab("Weapon Quantity")
             .Caption("SIPRI trend-indicator value")
-            .Theme(dark: false);
+            .Theme(theme);
     }
 }

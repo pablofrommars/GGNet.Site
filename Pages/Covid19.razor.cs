@@ -6,292 +6,156 @@ using Microsoft.AspNetCore.Components;
 
 using NodaTime;
 
+using GGNet.Components;
+using GGNet.Elements;
+using GGNet.Palettes;
+
 using GGNet.NaturalEarth;
+
+using GGNet.Site.Data;
 
 namespace GGNet.Site.Pages
 {
     public partial class Covid19 : ComponentBase
     {
-        private async Task<List<TS>> GetData()
+        private int sideMenuItem = 0;
+        private int mainMenuItem = 0;
+
+        private List<TS> data;
+        private TS ts;
+
+        private Data<TS, double, double> map;
+
+        private readonly Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)> sparks =
+            new Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)>();
+
+        private Source<StatPoint> statSource = new Source<StatPoint>();
+        private Data<StatPoint, LocalDate, double> statData;
+        private Plot<StatPoint, LocalDate, double> statPlot;
+
+        private Data<TS, double, double> cfr;
+
+        protected override async Task OnInitializedAsync()
         {
-            var csv = await Http.GetStringAsync("https://raw.githubusercontent.com/owid/covid-19-data/master/input/ecdc/releases/latest.csv");
+            data = await Service.GetDataAsync().ConfigureAwait(false);
 
-            static TS.DoubleStat ConfirmedDouble(TS.Point[] points, TS.Point last)
             {
-                TS.DoubleStat confirmedDouble = null;
+                var theme = Theme.Default(dark: false);
+                theme.Tooltip.Text.Size = new Size { Value = 16, Units = Units.px };
 
-                for (var i = 1; i < points.Length - 1; i++)
+                foreach (var ts in data)
                 {
-                    var point = points[points.Length - 1 - i];
+                    var source = new Source<TS.Point>(ts.Points.TakeLast(15));
 
-                    if (point.ConfirmedCumulative == 0)
-                    {
-                        break;
-                    }
+                    var confirmed = Plot.New(source, o => o.Date, o => o.ConfirmedCumulative)
+                        .Geom_Bar(tooltip: o => $"{o.ConfirmedCumulative:#,###0}", fill: "var(--confirmed-color)", alpha: 0.8, animation: true)
+                        .Theme(theme);
 
-                    if (last.ConfirmedCumulative >= 2 * point.ConfirmedCumulative)
-                    {
-                        confirmedDouble = new TS.DoubleStat
-                        {
-                            Date = point.Date,
-                            Days = i,
-                            Rate = last.ConfirmedCumulative / point.ConfirmedCumulative
-                        };
+                    var deaths = Plot.New(source, o => o.Date, o => o.DeathsCumulative)
+                        .Geom_Bar(tooltip: o => $"{o.DeathsCumulative:#,###0}", fill: "var(--deaths-color)", alpha: 0.8, animation: true)
+                        .Theme(theme);
 
-                        break;
-                    }
-                }
-
-                return confirmedDouble;
-            }
-
-            static TS.DoubleStat DeathsDouble(TS.Point[] points, TS.Point last)
-            {
-                TS.DoubleStat deathsDouble = null;
-
-                for (var i = 1; i < points.Length - 1; i++)
-                {
-                    var point = points[points.Length - 1 - i];
-
-                    if (point.DeathsCumulative == 0)
-                    {
-                        break;
-                    }
-
-                    if (last.DeathsCumulative >= 2 * point.DeathsCumulative)
-                    {
-                        deathsDouble = new TS.DoubleStat
-                        {
-                            Date = point.Date,
-                            Days = i,
-                            Rate = last.DeathsCumulative / point.DeathsCumulative
-                        };
-
-                        break;
-                    }
-                }
-
-                return deathsDouble;
-            }
-
-            var data = csv
-                .Split('\n')
-                .Skip(1)
-                .Select(line =>
-                {
-                    var fields = line.Split(',');
-
-                    if (fields.Count() != 10)
-                    {
-                        return default;
-                    }
-
-                    var a2 = fields[7];
-                    if (a2 == "UK")
-                    {
-                        a2 = "GB";
-                    }
-
-                    var year = int.Parse(fields[3]);
-                    var month = int.Parse(fields[2]);
-                    var day = int.Parse(fields[1]);
-
-                    var date = new LocalDate(year, month, day);
-
-                    var cases = double.Parse(fields[4]);
-                    var deaths = double.Parse(fields[5]);
-
-                    long.TryParse(fields[9], out var population);
-
-                    return (a2, date, cases, deaths, population);
-                })
-                .Where(o => !string.IsNullOrEmpty(o.a2))
-                .GroupBy(o => o.a2)
-                .Select(g =>
-                {
-                    var points = g
-                        .OrderBy(o => o.date)
-                        .Select(o => new TS.Point
-                        {
-                            Date = o.date,
-                            ConfirmedDelta = o.cases,
-                            DeathsDelta = o.deaths
-                        })
-                        .ToArray();
-
-                    var confirmedCumulative = 0.0;
-                    var deathsCumulative = 0.0;
-
-                    for (var i = 0; i < points.Length; i++)
-                    {
-                        var point = points[i];
-
-                        confirmedCumulative += point.ConfirmedDelta;
-                        deathsCumulative += point.DeathsDelta;
-
-                        point.ConfirmedCumulative = confirmedCumulative;
-                        point.DeathsCumulative = deathsCumulative;
-                    }
-
-                    var last = points[^1];
-
-                    var ts = new TS
-                    {
-                        Country = Scale110.Countries.SingleOrDefault(o => o.A2 == g.Key),
-                        Points = points,
-                        Population = g.First().population,
-                        ConfirmedDelta = last.ConfirmedDelta,
-                        ConfirmedCumulative = last.ConfirmedCumulative,
-                        DeathsDelta = last.DeathsDelta,
-                        DeathsCumulative = last.DeathsCumulative
-                    };
-
-                    ts.ConfirmedDouble = ConfirmedDouble(ts.Points, last);
-                    ts.DeathsDouble = DeathsDouble(ts.Points, last);
-
-                    return ts;
-                })
-                .Where(o => o.Country != null && o.Country.Capital != null)
-                .ToList();
-
-            var points = new SortedDictionary<LocalDate, TS.Point>();
-
-            long population = 0;
-            foreach (var ts in data)
-            {
-                population += ts.Population;
-
-                for (var i = 0; i < ts.Points.Length; i++)
-                {
-                    var point = ts.Points[i];
-
-                    if (!points.TryGetValue(point.Date, out var p))
-                    {
-                        p = new TS.Point { Date = point.Date };
-
-                        points[point.Date] = p;
-                    }
-
-                    p.ConfirmedCumulative += point.ConfirmedCumulative;
-                    p.ConfirmedDelta += point.ConfirmedDelta;
-                    p.DeathsCumulative += point.DeathsCumulative;
-                    p.DeathsDelta += point.DeathsDelta;
+                    sparks[ts.Country.A2] = (confirmed, deaths);
                 }
             }
 
-            var tspoints = points.Values.ToArray();
-            var last = tspoints[^1];
-
-            data.Insert(0, new TS
             {
-                Country = new Country { Name = "World", A2 = "*" },
-                Points = tspoints,
-                Population = population,
-                ConfirmedDelta = last.ConfirmedDelta,
-                ConfirmedCumulative = last.ConfirmedCumulative,
-                DeathsDelta = last.DeathsDelta,
-                DeathsCumulative = last.DeathsCumulative,
-                ConfirmedDouble = ConfirmedDouble(tspoints, last),
-                DeathsDouble = DeathsDouble(tspoints, last)
-            });
+                var theme = Theme.Default(dark: false);
 
-            return data;
-        }
+                theme.Panel.Grid.Major.X.Alpha = 0.25;
+                theme.Panel.Grid.Minor.X.Alpha = 0.25;
+                theme.Panel.Grid.Major.Y.Alpha = 0.25;
+                theme.Panel.Grid.Minor.Y.Alpha = 0.25;
 
-        private List<StatPoint> GetStatPoints(TS.Point[] points)
-        {
-            var stats = new List<StatPoint>();
+                theme.Tooltip.Margin = new Margin();
+                theme.Tooltip.Background = "#FFFFFF";
+                theme.Tooltip.Alpha = 1.0;
+                theme.Tooltip.Text.Color = "#000000";
 
-            for (var i = 0; i < points.Length; i++)
-            {
-                var point = points[i];
-
-                stats.Add(new StatPoint
-                {
-                    Date = point.Date,
-                    Stat = Stat.Deaths,
-                    Delta = point.DeathsDelta,
-                    Cumulative = point.DeathsCumulative
-                });
-
-                stats.Add(new StatPoint
-                {
-                    Date = point.Date,
-                    Stat = Stat.Confirmed,
-                    Delta = point.ConfirmedDelta,
-                    Cumulative = point.ConfirmedCumulative,
-                });
+                map = Plot.New(data.Where(o => o.Name != "World"), o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
+                    .Geom_Map(Scale110.Countries, o => o.Polygons, fill: "grey", alpha: 0.1, color: "#FFFFFF", width: 0.5)
+                    .Geom_Point(onclick: (ts, e) => OnClick(ts), tooltip: Tooltip, color: "#000000", alpha: 0.5, animation: true)
+                    .Scale_Longitude()
+                    .Scale_Latitude()
+                    .Scale_Color_Discrete(o => o.Country.Continent, Colors.Viridis, guide: false)
+                    .Scale_Size_Continuous(o => o.ConfirmedCumulative, range: (1, 12), guide: false)
+                    .Theme(theme);
             }
 
-            return stats;
-        }
-    }
+            ts = data.First();
+            statSource.Add(ts.GetStatPoints());
 
-    public class TS
-    {
-        public class Point
+            var palette = Discrete<Stat, string>.Enum(new[] { "var(--confirmed-color)", "var(--deaths-color)" });
+
+            statData = Plot.New(statSource, o => o.Date, o => o.Cumulative)
+                .Geom_Bar(y: o => o.Delta, tooltip: Tooltip, alpha: 0.6, position: PositionAdjustment.Stack)
+                .Geom_Line(tooltip: Tooltip, width: 3, alpha: 0.8)
+                .Scale_Y_Continuous("#,##0")
+                .Scale_Color_Discrete(o => o.Stat, palette)
+                .Scale_Fill_Discrete(o => o.Stat, palette, guide: false)
+                .Theme(dark: false, legend: Position.Bottom);
+
+            {
+                var theme = Theme.Default(dark: false);
+
+                theme.Tooltip.Margin = new Margin();
+                theme.Tooltip.Background = "#FFFFFF";
+                theme.Tooltip.Alpha = 1.0;
+                theme.Tooltip.Text.Color = "#000000";
+
+                cfr = Plot.New(data.Where(o => o.DeathsCumulative >= 5 && !string.IsNullOrEmpty(o.Country.Continent)), o => o.ConfirmedCumulative, o => o.DeathsCumulative)
+                    .Title("Case Fatality Rate")
+                    .Geom_ABLine(new[] { 0.005, 0.01, 0.02, 0.05, 0.1 }, o => o, o => 0, o => $"{o:P2}".Replace(".00", ""), color: "rgba(0, 0, 0, 0.3)", lineType: LineType.Dotted)
+                    .Geom_Point(tooltip: TooltipCFR, size: 3, alpha: 0.5, animation: true)
+                    .Scale_X_Log10()
+                    .XLab("Confirmed Cases - Log")
+                    .Scale_Y_Log10()
+                    .YLab("Confirmed Deaths - Log")
+                    .Scale_Color_Discrete(o => o.Country.Continent, Colors.Viridis)
+                    .Theme(theme);
+            }
+        }
+
+        public async Task OnClick(TS ts)
         {
-            public LocalDate Date { get; set; }
+            this.ts = ts;
 
-            public double ConfirmedDelta { get; set; }
+            statSource.Clear();
 
-            public double ConfirmedCumulative { get; set; }
+            statSource.Add(ts.GetStatPoints());
 
-            public double DeathsDelta { get; set; }
+            StateHasChanged();
 
-            public double DeathsCumulative { get; set; }
+            await statPlot.RefreshAsync().ConfigureAwait(false);
         }
 
-        public class DoubleStat
-        {
-            public LocalDate Date { get; set; }
+        public string Tooltip(TS ts) =>
+$@"
+<div class=""border rounded"" style=""padding: 5px 10px;"">
+    <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{ts.Country.Name}</div>
+    <div class=""d-flex justify-content-center"">
+        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: var(--confirmed-color)"">{ts.ConfirmedCumulative:#,##0} (+{ts.ConfirmedDelta:#,##0})</div></div>
+        <div><div class=""text-center"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: var(--deaths-color)"">{ts.DeathsCumulative:#,##0} (+{ts.DeathsDelta:#,##0})</div></div>
+    </div>
+</div>
+";
 
-            public int Days { get; set; }
+        public string Tooltip(StatPoint o) =>
+$@"
+<b>{o.Date}</b><br/>
+{o.Stat}: {o.Cumulative:#,##0} (+{o.Delta:#,##0})
+";
 
-            public double Rate { get; set; }
-        }
-
-        public Country Country { get; set; }
-
-        public string Name => Country.Name;
-
-        public Point[] Points { get; set; }
-
-        public long Population { get; set; }
-
-        public double ConfirmedDelta { get; set; }
-
-        public double ConfirmedCumulative { get; set; }
-
-        public DoubleStat ConfirmedDouble { get; set; }
-
-        public int ConfirmedDoubleDays => ConfirmedDouble?.Days ?? 0;
-
-        public double DeathsDelta { get; set; }
-
-        public double DeathsCumulative { get; set; }
-
-        public DoubleStat DeathsDouble { get; set; }
-
-        public int DeathsDoubleDays => DeathsDouble?.Days ?? 0;
-
-        public double CFR => DeathsCumulative / ConfirmedCumulative;
-    }
-
-    public enum Stat
-    {
-        Confirmed,
-        Deaths
-    }
-
-    public class StatPoint
-    {
-        public LocalDate Date { get; set; }
-
-        public Stat Stat { get; set; }
-
-        public double Delta { get; set; }
-
-        public double Cumulative { get; set; }
+        public string TooltipCFR(TS ts) =>
+$@"
+<div class=""border rounded"" style=""padding: 5px 10px;"">
+    <div class=""text-center font-weight-bold border-bottom"" style=""color: var(--tooltip-color);"">{ts.Country.Name}</div>
+    <div class=""d-flex justify-content-center"">
+        <div><div class=""text-center mr-2"">Confirmed</div><div class=""text-center font-weight-bold mr-2"" style=""color: var(--confirmed-color)"">{ts.ConfirmedCumulative:#,##0}</div></div>
+        <div><div class=""text-center mr-2"">Deaths</div><div class=""text-center font-weight-bold"" style=""color: var(--deaths-color)"">{ts.DeathsCumulative:#,##0}</div></div>
+        <div><div class=""text-center"">CFR(%)</div><div class=""text-center font-weight-bold"">{ts.CFR * 100:N1}</div></div>
+    </div>
+</div>
+";
     }
 }

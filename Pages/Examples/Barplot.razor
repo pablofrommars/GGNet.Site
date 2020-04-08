@@ -2,6 +2,7 @@
 @page "/examples/barplot"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 @using GGNet.Formats
 
@@ -35,8 +36,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@beatles T=Beatles.Point TX=Double TY=Double />
+                <div class="border rounded-lg p-1 shadow-sm">
+                    <Plot Data=@beatles T=Beatles.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -69,12 +70,16 @@
             [3.0] = "2010"
         };
 
+        var theme = Theme.Default(dark: false);
+        theme.Panel.Grid.Major.X.Width = 0;
+        theme.Panel.Grid.Minor.X.Width = 0;
+
         beatles = Plot.New(source, x: X, y: o => o.N)
             .Geom_Bar(position: PositionAdjustment.Dodge)
             .Scale_X_Discrete(expand: (0.0, 0.1, 0, 0.1), formatter: labeller)
             .Scale_Fill_Discrete(o => o.Name, Colors.Brewer.YlGnBu[4], direction: -1)
             .YLab("#")
             .XLab("Year")
-            .Theme(dark: false);
+            .Theme(theme);
     }
 }

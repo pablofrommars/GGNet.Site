@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Globalization;
 using System.Threading.Tasks;
-using System.Text;
+
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
 
 namespace GGNet.Site
 {
+    using Data;
+
     public class Program
     {
         public static async Task Main(string[] args)
@@ -21,6 +21,7 @@ namespace GGNet.Site
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddBaseAddressHttpClient();
+            builder.Services.AddScoped<Covid19Service>();
 
             await builder.Build().RunAsync();
         }

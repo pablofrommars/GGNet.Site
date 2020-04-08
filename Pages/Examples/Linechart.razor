@@ -2,6 +2,7 @@
 @page "/examples/linechart"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -36,8 +37,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1">
-                    <GGNet.Components.Plot Data=@beatles2 T=Beatles.Point TX=Double TY=Double />
+                <div class="border rounded-lg p-1 shadow-sm">
+                    <Plot Data=@beatles2 T=Beatles.Point TX=Double TY=Double />
                 </div>
             </div>
 

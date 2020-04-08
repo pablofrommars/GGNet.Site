@@ -2,6 +2,7 @@
 @page "/examples/tooltip"
 
 @using GGNet
+@using GGNet.Components
 @using GGNet.Datasets
 
     <div class="container-fluid mt-4">
@@ -11,7 +12,7 @@
             <div class="col-md-6">
                 <h2>Tooltips</h2>
                 <p>Built-in tooltip support</p>
-                <div class="border rounded-lg p-3 mt-3">
+                <div class="border rounded-lg p-3 mt-3 shadow-sm">
 
 <pre class="csharp">
 <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Weight</span>, <span class="pl-smi">y</span>: <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">MPG</span>)
@@ -25,8 +26,8 @@
             </div>
 
             <div class="col-md-6">
-                <div class="border rounded-lg p-1 bg-dark">
-                    <GGNet.Components.Plot Data=@cars T=Cars.Point TX=Double TY=Double />
+                <div class="border rounded-lg p-1 bg-dark shadow-sm">
+                    <Plot Data=@cars T=Cars.Point TX=Double TY=Double />
                 </div>
             </div>
 
@@ -39,15 +40,11 @@
 
     protected override void OnInitialized()
     {
-        var theme = Theme.Default();
-        theme.Plot.Background.Fill = "var(--dark)";
-        theme.Panel.Background.Fill = "var(--dark)";
-
         cars = Plot.New(Cars.Load(), x: o => o.Weight, y: o => o.MPG)
             .Geom_Point(tooltip: o => $"<b>Model:</b> {o.Model}<br/><b>Horse Power:</b> {o.HP}<br/><b>Cylinders:</b> {o.Cylinders}")
             .XLab("Weight (1K lbs)")
             .YLab("Miles/Gallon")
             .Caption("source: Motor Trend")
-            .Theme(theme);
+            .Theme();
     }
 }
