@@ -54,6 +54,7 @@
         beatles1 = Plot.New(Beatles.Load(), x: o => o.Year)
             .Geom_Area(y: o => o.N)
             .Geom_VLine(new[] { 1984 }, o => o, o => o.ToString(), color: "#FFFFFF", lineType: LineType.Dashed)
+            .Scale_Y_Continuous(format: "#,##0")
             .Scale_Fill_Discrete(o => o.Name, GGNet.Colors.FT, guide: false)
             .Facet_Wrap(selector: o => o.Name, freeY: true)
             .Title("Popularity of Beatles Names")

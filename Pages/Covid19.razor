@@ -220,7 +220,7 @@
                         </div>
                         <div class="flex-fill d-flex">
                             <div class="m-auto flex-fill p-2 border rounded shadow-sm">
-                                <Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width="720" Height="400" @ref=@statPlot />
+                                <Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width=720 Height=400 @ref=@statPlot />
                             </div>
                         </div>
                     </div>
@@ -253,15 +253,27 @@
                 </div>
             </div>
 
-
             <div class="row flex-fill @(sideMenuItem != 1 ? "d-none" : "")">
                 <div class="col px-0 d-flex flex-column">
                     <div class="w-75 m-auto p-2 border rounded shadow-sm">
-                        <Plot Data=@cfr T=TS TX=Double TY=Double Width="720" Height="400" />
+                        <Plot Data=@cfr T=TS TX=Double TY=Double Width=720 Height=400 />
                     </div>
                 </div>
             </div>
 
+            <div class="row flex-fill @(sideMenuItem != 2 ? "d-none" : "")">
+                <div class="col px-0 d-flex flex-column">
+                    <div class="w-75 m-auto p-2 border rounded shadow-sm">
+                        <Plot Data=@age T="(TS, double)" TX=Double TY=Double Width=720 Height=400 />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row flex-fill @(sideMenuItem != 3 ? "d-none" : "")">
+                <div class="col px-0 d-flex flex-column">
+                    <h3>TODO</h3>
+                </div>
+            </div>
         }
     </div>
 </div>

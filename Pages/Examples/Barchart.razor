@@ -66,6 +66,7 @@
         spy = Plot.New(source, x: o => o.date)
             .Title("SPY US Equity")
             .Scale_X_Discrete_Date()
+            .Scale_Y_Continuous(format: "#,##0")
             .Panel(pf => pf.Geom_OHLC(open: o => o.open, high: o => o.high, low: o => o.low, close: o => o.close)
             .YLab("Price"), height: 0.8)
             .Panel(pf => pf.Geom_Volume(volume: o => o.volume / 1000.0)

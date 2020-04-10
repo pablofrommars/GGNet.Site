@@ -110,8 +110,3 @@ html, body {
             border-bottom: 2px solid var(--blue);
             color: inherit;
         }
-
-
-.table-net {
-    margin-bottom: 0 !important;
-}

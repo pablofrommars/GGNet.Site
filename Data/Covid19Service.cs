@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using System.Net.Http;
 
+using Microsoft.AspNetCore.Components;
+
 using NodaTime;
 
 using GGNet.NaturalEarth;
@@ -13,13 +15,16 @@ namespace GGNet.Site.Data
     public class Covid19Service
     {
         private readonly HttpClient client;
+        private readonly NavigationManager navigation;
 
-        public Covid19Service(HttpClient client)
+        public Covid19Service(HttpClient client, NavigationManager navigation)
         {
             this.client = client;
+            this.navigation = navigation;
         }
 
         private List<TS> data = null;
+        private List<(string a3, double age60_, double age40_59, double age_20_39)> ageData = null;
 
         public async Task<List<TS>> GetDataAsync()
         {
@@ -208,6 +213,37 @@ namespace GGNet.Site.Data
             this.data = data.OrderByDescending(o => o.ConfirmedCumulative).ToList();
 
             return this.data;
+        }
+
+        public async Task<List<(string a3, double age60_, double age40_59, double age_20_39)>> GetAgeDataAsync()
+        {
+            if (ageData != null)
+            {
+                return ageData;
+            }
+
+            var csv = await client.GetStringAsync(navigation.ToAbsoluteUri("data/Age.csv"));
+
+            var data = csv
+                .Split('\n')
+                .Skip(1)
+                .Select(line =>
+                {
+                    var fields = line.Split(',');
+
+                    var a3 = fields[0];
+
+                    var age60_ = double.Parse(fields[1]);
+                    var age40_59 = double.Parse(fields[2]);
+                    var age20_39 = double.Parse(fields[3]);
+
+                    return (a3, age60_, age40_59, age20_39);
+                })
+                .ToList();
+
+            ageData = data;
+
+            return ageData;
         }
     }
 

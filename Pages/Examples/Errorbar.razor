@@ -43,10 +43,11 @@
 
     protected override void OnInitialized()
     {
-        tip = Plot.New(Tip.Load(), o => o.Day, o => o.Avg)
-            .Geom_ErrorBar(ymin: o => o.Lower, ymax: o => o.Upper, position: PositionAdjustment.Dodge)
+        tip = Plot.New(Tip.Load(), o => o.Day, o => o.Avg / 100.0)
+            .Geom_ErrorBar(ymin: o => o.Lower / 100.0, ymax: o => o.Upper / 100.0, position: PositionAdjustment.Dodge)
+            .Scale_Y_Continuous(format: "P0")
             .Scale_Color_Discrete(o => o.Sex, new[] { "#69b3a2", "#404080" })
-            .YLab("Tip (%)")
+            .YLab("Tip")
             .Theme();
     }
 }

@@ -55,6 +55,7 @@
 
         beatles2 = Plot.New(source, x: o => o.Year, y: o => o.N)
             .Geom_Line(width: 2.0)
+            .Scale_Y_Continuous(format: "#,##0")
             .Scale_Color_Discrete(o => o.Name, Colors.Ipsum, guide: true)
             .Scale_LineType_Discrete(o => o.Name, guide: false)
             .Title("Popularity of Beatles Names Since 1984")

@@ -35,6 +35,8 @@ namespace GGNet.Site.Pages
 
         private Data<TS, double, double> cfr;
 
+        private Data<(TS ts, double age), double, double> age;
+
         protected override async Task OnInitializedAsync()
         {
             data = await Service.GetDataAsync().ConfigureAwait(false);
@@ -113,6 +115,24 @@ namespace GGNet.Site.Pages
                     .YLab("Confirmed Deaths - Log")
                     .Scale_Color_Discrete(o => o.Country.Continent, Colors.Viridis)
                     .Theme(theme);
+            }
+
+            {
+                var ageData = await Service.GetAgeDataAsync().ConfigureAwait(false);
+
+                var combined = data
+                    .Where(o => o.Population > 0 && o.DeathsCumulative > 5 && !string.IsNullOrEmpty(o.Country.Continent))
+                        .Join(ageData, o => o.Country.A3, o => o.a3, (o, p) => (ts: o, age: p.age60_))
+                        .ToList();
+
+                age = Plot.New(combined, o => o.age / 100, o => o.ts.DeathsCumulative / o.ts.Population * 1000000.0)
+                    .Title("Proportion of Population above 60")
+                    .Geom_Point(tooltip: o => o.ts.Name, size: 3, alpha: 0.5, animation: true)
+                    .Scale_X_Continuous(format: "P2")
+                    .Scale_Y_Log10()
+                    .YLab("Confirmed Deaths / Million - Log")
+                    .Scale_Color_Discrete(o => o.ts.Country.Continent, Colors.Viridis)
+                    .Theme(dark: false);
             }
         }
 

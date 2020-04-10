@@ -76,6 +76,7 @@
 
         weapon = Plot.New(source, o => o.Value, o => o.Id)
             .Geom_Bar(fill: "#69b3a2", tooltip: o => $"<b>{o.Value:#,##0}</b>", animation: true)
+            .Scale_X_Continuous(format: "#,##0")
             .Scale_Y_Discrete(expand: (0.0, 0.1, 0, 0.1), formatter: labeller)
             .Flip()
             .XLab("Weapon Quantity")

@@ -51,10 +51,11 @@
     {
         diamond = Plot.New(Diamond.Load(), x: o => o.Carat, y: o => o.Price)
             .Geom_Hex(dx: o => o.Dx, dy: o => o.Dy)
+            .Scale_Y_Continuous(format: "#,##0")
+            .Scale_Fill_Continuous(o => o.Count, Colors.Viridis, m: 10, name: "Count", format: "#,##0")
             .Title("Prices of 50,000 round cut diamonds")
             .XLab("Carat")
             .YLab("Price($)")
-            .Scale_Fill_Continuous(o => o.Count, Colors.Viridis, m: 10, name: "Count")
             .Theme(dark: false);
     }
 }
