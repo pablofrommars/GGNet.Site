@@ -20,7 +20,7 @@
     .<span class="pl-en">XLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Weight (1K lbs)<span class="pl-pds">"</span></span>)
     .<span class="pl-en">YLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Miles/Gallon<span class="pl-pds">"</span></span>)
     .<span class="pl-en">Caption</span>(<span class="pl-s"><span class="pl-pds">"</span>source: Motor Trend<span class="pl-pds">"</span></span>)
-    .<span class="pl-en">Theme</span>();
+    .<span class="pl-en">Theme</span>()
 </pre>
                 </div>
             </div>
@@ -41,7 +41,7 @@
     protected override void OnInitialized()
     {
         cars = Plot.New(Cars.Load(), x: o => o.Weight, y: o => o.MPG)
-            .Geom_Point(tooltip: o => $"<b>Model:</b> {o.Model}<br/><b>Horse Power:</b> {o.HP}<br/><b>Cylinders:</b> {o.Cylinders}")
+            .Geom_Point(tooltip: o => $"<b>Model:</b> {o.Model}<br/><b>Horse Power:</b> {o.HP}<br/><b>Cylinders:</b> {o.Cylinders}", animation: true)
             .XLab("Weight (1K lbs)")
             .YLab("Miles/Gallon")
             .Caption("source: Motor Trend")

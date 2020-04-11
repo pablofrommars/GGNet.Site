@@ -150,9 +150,15 @@ namespace GGNet.Site.Data
 
                     var last = points[^1];
 
+                    var a2 = g.Key;
+                    if (a2 == "UK")
+                    {
+                        a2 = "GB";
+                    }
+
                     var ts = new TS
                     {
-                        Country = Scale110.Countries.SingleOrDefault(o => o.A2 == g.Key),
+                        Country = Scale110.Countries.SingleOrDefault(o => o.A2 == a2),
                         Points = points,
                         Population = g.First().population,
                         ConfirmedDelta = last.ConfirmedDelta,

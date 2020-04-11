@@ -1,0 +1,175 @@
+﻿@namespace GGNet.Site.Pages
+@page "/examples/abline"
+
+@using GGNet
+@using GGNet.Components
+
+<div class="container-fluid mt-4">
+
+    <div class="row m-4">
+
+        <div class="col-md-6">
+            <h2>Annotations</h2>
+            <p>Display annotations overlays</p>
+
+<Code>
+<CSharp>
+<span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">data</span>, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">age</span>, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">deaths</span>)
+    .<span class="pl-en">Title</span>(<span class="pl-s"><span class="pl-pds">"</span>Covid19 - Proportion of Population above 60<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">SubTitle</span>(<span class="pl-s"><span class="pl-pds">"</span>R²=0.4<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">Geom_Ribbon</span>(<span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">lower</span>, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">upper</span>, <span class="pl-smi">fill</span>: <span class="pl-s"><span class="pl-pds">"</span>rgba(0, 0, 0, 0.05)<span class="pl-pds">"</span></span>, <span class="pl-smi">scale</span>: (<span class="pl-c1">false</span>, <span class="pl-c1">true</span>))
+    .<span class="pl-en">Geom_ABLine</span>(<span class="pl-k">new</span>[] { (<span class="pl-en">a: </span><span class="pl-c1">6.37009</span>, <span class="pl-smi">b</span>: <span class="pl-k">-</span><span class="pl-c1">0.540860355</span>) }, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">a</span>, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">b</span>, <span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">$"</span>y = {<span class="pl-smi">o</span>.<span class="pl-smi">a</span>:<span class="pl-smi">N2</span>}x {<span class="pl-smi">o</span>.<span class="pl-smi">b</span>:<span class="pl-smi">N2</span>}<span class="pl-pds">"</span></span>, <span class="pl-smi">transformation</span>: (<span class="pl-c1">false</span>, <span class="pl-c1">false</span>), <span class="pl-smi">color</span>: <span class="pl-s"><span class="pl-pds">"</span>rgba(0, 0, 0, 0.3)<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">Geom_Point</span>(<span class="pl-smi">size</span>: <span class="pl-c1">3</span>, <span class="pl-smi">alpha</span>: <span class="pl-c1">0.5</span>)
+    .<span class="pl-en">Scale_X_Continuous</span>(<span class="pl-smi">format</span>: <span class="pl-s"><span class="pl-pds">"</span>P0<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">Scale_Y_Log10</span>()
+    .<span class="pl-en">YLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Confirmed Deaths / Million - Log<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">Scale_Color_Discrete</span>(<span class="pl-smi">o</span> <span class="pl-k">=&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">continent</span>, <span class="pl-smi">Colors</span>.<span class="pl-smi">Viridis</span>)
+    .<span class="pl-en">Theme</span>(<span class="pl-smi">dark</span>: <span class="pl-c1">false</span>)
+</CSharp>
+<FSharp>
+Plot.New(data, x <span class="pl-k">=</span> (<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> o.age), y <span class="pl-k">=</span> (<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> o.deaths))
+    .Title(<span class="pl-s"><span class="pl-pds">"</span>Covid19 - Proportion of Population above 60<span class="pl-pds">"</span></span>)
+    .SubTitle(<span class="pl-s"><span class="pl-pds">"</span>R²=0.4<span class="pl-pds">"</span></span>)
+    .Geom<span class="pl-k">_</span>Ribbon((<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> o.lower), (<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> o.upper), fill <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>rgba(0, 0, 0, 0.05)<span class="pl-pds">"</span></span>, scale <span class="pl-k">=</span> Plot.Scale(<span class="pl-c1">false</span>, <span class="pl-c1">true</span>))
+    .Geom<span class="pl-k">_</span>ABLine(<span class="pl-k">[|</span> (<span class="pl-c1">6.37009</span>, <span class="pl-k">-</span><span class="pl-c1">0.540860355</span>) <span class="pl-k">|]</span>, (<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> fst o), (o <span class="pl-k">-&gt;</span> snd o), (<span class="pl-k">fun</span> <span class="pl-v">o</span> =<span class="pl-k">&gt;</span> $<span class="pl-s"><span class="pl-pds">"</span>y = {fst o:N2}x {snd o:N2}<span class="pl-pds">"</span></span>, transformation <span class="pl-k">=</span> (<span class="pl-c1">false</span>, <span class="pl-c1">false</span>), color <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>rgba(0, 0, 0, 0.3)<span class="pl-pds">"</span></span>)
+    .Geom<span class="pl-k">_</span>Point(size <span class="pl-k">=</span> <span class="pl-c1">3</span>, alpha <span class="pl-k">=</span> <span class="pl-c1">0.5</span>)
+    .Scale<span class="pl-k">_</span>X<span class="pl-k">_</span>Continuous(format <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>P0<span class="pl-pds">"</span></span>)
+    .Scale<span class="pl-k">_</span>Y<span class="pl-k">_</span>Log10<span class="pl-c1">()</span>
+    .YLab(<span class="pl-s"><span class="pl-pds">"</span>Confirmed Deaths / Million - Log<span class="pl-pds">"</span></span>)
+    .Scale<span class="pl-k">_</span>Color<span class="pl-k">_</span>Discrete((<span class="pl-k">fun</span> <span class="pl-v">o</span> -<span class="pl-k">&gt;</span> o.continent), Colors.Viridis)
+    .Theme(dark<span class="pl-k">:</span> <span class="pl-c1">false</span>)<span class="pl-k">;</span>
+</FSharp>
+</Code>
+        </div>
+
+        <div class="col-md-6">
+            <div class="border rounded-lg p-1 shadow-sm">
+                <Plot Data=@plot T="(string, double, double)" TX=Double TY=Double />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    Data<(string, double, double), double, double> plot;
+
+    protected override void OnInitialized()
+    {
+        var data = new[]
+        {
+            (continent: "Asia", age: 0.042800000000000005, deaths: 0.4035253480903809),
+            (continent: "Europe", age: 0.21100000000000002, deaths: 8.024069417271146),
+            (continent: "Africa", age: 0.10099999999999999, deaths: 6.062266725574849),
+            (continent: "South America", age: 0.159, deaths: 1.8429243235490085),
+            (continent: "Asia", age: 0.188, deaths: 3.726570037834849),
+            (continent: "Oceania", age: 0.21899999999999997, deaths: 2.1606595197117966),
+            (continent: "Europe", age: 0.265, deaths: 36.05726979552589),
+            (continent: "Asia", age: 0.11699999999999999, deaths: 1.0058000465484263),
+            (continent: "North America", age: 0.152, deaths: 20.744736023234104),
+            (continent: "Asia", age: 0.0791, deaths: 0.1673318220212384),
+            (continent: "Europe", age: 0.22699999999999998, deaths: 2.0030813717016893),
+            (continent: "Europe", age: 0.255, deaths: 264.3129072598762),
+            (continent: "South America", age: 0.0992, deaths: 1.7616268694604542),
+            (continent: "Europe", age: 0.249, deaths: 11.131405033019659),
+            (continent: "South America", age: 0.14, deaths: 5.0413107488149596),
+            (continent: "Europe", age: 0.28300000000000003, deaths: 3.5591160636290224),
+            (continent: "Africa", age: 0.0393, deaths: 1.3163533872177529),
+            (continent: "Africa", age: 0.047599999999999996, deaths: 0.39656987678217015),
+            (continent: "North America", age: 0.252, deaths: 15.353954800979285),
+            (continent: "South America", age: 0.174, deaths: 3.4705240384512708),
+            (continent: "Asia", age: 0.17600000000000002, deaths: 2.400321670388374),
+            (continent: "South America", age: 0.13, deaths: 1.611321629162988),
+            (continent: "Europe", age: 0.28, deaths: 5.1352276617596715),
+            (continent: "North America", age: 0.21600000000000003, deaths: 1.322968550920795),
+            (continent: "Asia", age: 0.198, deaths: 12.61283229557752),
+            (continent: "Africa", age: 0.046799999999999994, deaths: 0.23790239271639937),
+            (continent: "Europe", age: 0.262, deaths: 42.60496777374036),
+            (continent: "North America", age: 0.111, deaths: 11.856407612001883),
+            (continent: "South America", age: 0.113, deaths: 17.384324151034775),
+            (continent: "Africa", age: 0.0825, deaths: 1.3716223228789806),
+            (continent: "North America", age: 0.122, deaths: 0.9344711453999723),
+            (continent: "Europe", age: 0.26899999999999996, deaths: 18.16965002225782),
+            (continent: "Europe", age: 0.287, deaths: 8.698725093103542),
+            (continent: "Europe", age: 0.267, deaths: 197.00765715932422),
+            (continent: "Europe", age: 0.292, deaths: 30.67724282299031),
+            (continent: "Africa", age: 0.0548, deaths: 0.20156476067476894),
+            (continent: "South America", age: 0.0947, deaths: 7.702142736109185),
+            (continent: "North America", age: 0.0753, deaths: 2.5032537083096136),
+            (continent: "Europe", age: 0.268, deaths: 8.701184435935483),
+            (continent: "Europe", age: 0.215, deaths: 19.797835813719335),
+            (continent: "Asia", age: 0.10099999999999999, deaths: 0.17669446860731036),
+            (continent: "Asia", age: 0.095, deaths: 1.14322675415116),
+            (continent: "Asia", age: 0.0987, deaths: 51.735771186767124),
+            (continent: "Asia", age: 0.049800000000000004, deaths: 1.821323009033762),
+            (continent: "Europe", age: 0.20199999999999999, deaths: 59.13251163179771),
+            (continent: "Asia", age: 0.165, deaths: 10.693622098651478),
+            (continent: "Europe", age: 0.307, deaths: 311.9410852157483),
+            (continent: "Asia", age: 0.341, deaths: 0.6954921832210931),
+            (continent: "Asia", age: 0.0604, deaths: 0.7030928350721991),
+            (continent: "Asia", age: 0.11800000000000001, deaths: 0.5471507426011951),
+            (continent: "Africa", age: 0.045, deaths: 0.13620529328793934),
+            (continent: "Asia", age: 0.131, deaths: 2.9201663034709826),
+            (continent: "Europe", age: 0.265, deaths: 6.094210034439457),
+            (continent: "Europe", age: 0.205, deaths: 88.85554063660058),
+            (continent: "Asia", age: 0.107, deaths: 2.220207472044813),
+            (continent: "Africa", age: 0.0387, deaths: 0.36692073306569084),
+            (continent: "North America", age: 0.109, deaths: 1.8464105319637119),
+            (continent: "Europe", age: 0.18899999999999997, deaths: 8.178498839358207),
+            (continent: "Africa", age: 0.11900000000000001, deaths: 2.969818484139143),
+            (continent: "Europe", age: 0.265, deaths: 145.72558311561065),
+            (continent: "Africa", age: 0.0424, deaths: 0.4901316885820883),
+            (continent: "Africa", age: 0.0452, deaths: 0.03573712465425608),
+            (continent: "Europe", age: 0.23199999999999998, deaths: 17.311664147694085),
+            (continent: "Asia", age: 0.0704, deaths: 0.33456631229182965),
+            (continent: "North America", age: 0.12300000000000001, deaths: 17.7166028270431),
+            (continent: "South America", age: 0.10099999999999999, deaths: 0.862555888230583),
+            (continent: "South America", age: 0.11199999999999999, deaths: 5.283023775232535),
+            (continent: "Asia", age: 0.0823, deaths: 1.9033881077173649),
+            (continent: "Europe", age: 0.258, deaths: 4.765848341542704),
+            (continent: "Europe", age: 0.293, deaths: 42.30792348626626),
+            (continent: "Asia", age: 0.0362, deaths: 2.156972214962413),
+            (continent: "Europe", age: 0.258, deaths: 13.197126662016348),
+            (continent: "Europe", age: 0.22399999999999998, deaths: 0.650617862021255),
+            (continent: "Asia", age: 0.0638, deaths: 1.3946609470928841),
+            (continent: "Europe", age: 0.252, deaths: 10.168883674272609),
+            (continent: "Europe", age: 0.278, deaths: 21.76676476221986),
+            (continent: "Africa", age: 0.0885, deaths: 0.4153713570504148),
+            (continent: "Asia", age: 0.23, deaths: 4.028255423000131),
+            (continent: "Europe", age: 0.27, deaths: 339.0780992338607),
+            (continent: "Asia", age: 0.16399999999999998, deaths: 0.3230272265805261),
+            (continent: "Europe", age: 0.259, deaths: 85.43504358905744),
+            (continent: "Europe", age: 0.253, deaths: 94.52192045528332),
+            (continent: "Asia", age: 0.191, deaths: 0.5041155707126944),
+            (continent: "North America", age: 0.165, deaths: 5.755983704810132),
+            (continent: "Africa", age: 0.134, deaths: 2.16165663830919),
+            (continent: "Asia", age: 0.129, deaths: 12.220643499727963),
+            (continent: "Europe", age: 0.24, deaths: 1.5463045606841173),
+            (continent: "Asia", age: 0.0318, deaths: 1.6613091178147472),
+            (continent: "North America", age: 0.22899999999999998, deaths: 57.39263156613564),
+            (continent: "South America", age: 0.20199999999999999, deaths: 2.029397857361742),
+            (continent: "South America", age: 0.109, deaths: 0.31174018741473686)
+        };
+
+        var t = 1.9855;
+        var n = 86;
+        var mse = 0.4248488275613588;
+        var xavg = 0.170082554;
+        var sx = 0.0831531957;
+        var N = 100;
+
+        double CI(double x) => t * Math.Sqrt(n / (n - 2.0) * mse) * Math.Sqrt(1.0 / n + (x - xavg) * (x - xavg) / ((n - 1.0) * sx * sx));
+
+        plot = Plot.New(data, o => o.age, o => o.deaths)
+            .Title("Covid19 - Proportion of Population above 60")
+            .SubTitle("R²=0.4")
+            .Geom_Ribbon(Enumerable.Range(0, N).Select(o => o * 0.4 / N), o => o, o => Math.Pow(10.0, 6.37009 * o - 0.540860355 - CI(o)), o => Math.Pow(10.0, 6.37009 * o - 0.540860355 + CI(o)), fill: "rgba(0, 0, 0, 0.05)", scale: (false, true))
+            .Geom_ABLine(new[] { (a: 6.37009, b: -0.540860355) }, o => o.a, o => o.b, o => $"y = {o.a:N2}x {o.b:N2}", transformation: (false, false), color: "rgba(0, 0, 0, 0.3)")
+            .Geom_Point(size: 3, alpha: 0.5)
+            .Scale_X_Continuous(format: "P0")
+            .Scale_Y_Log10()
+            .YLab("Confirmed Deaths / Million - Log")
+            .Scale_Color_Discrete(o => o.continent, Colors.Viridis)
+            .Theme(dark: false);
+    }
+}

@@ -23,17 +23,18 @@
     .<span class="pl-en">Title</span>(<span class="pl-s"><span class="pl-pds">"</span>Popularity of Beatles Names<span class="pl-pds">"</span></span>)
     .<span class="pl-en">YLab</span>(<span class="pl-s"><span class="pl-pds">"</span>#<span class="pl-pds">"</span></span>)
     .<span class="pl-en">XLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Year<span class="pl-pds">"</span></span>)
+    .<span class="pl-en">Theme</span>()
 </CSharp>
 <FSharp>
 <span class="pl-smi">Plot</span>.<span class="pl-en">New</span>(<span class="pl-smi">source</span>, <span class="pl-smi">x</span> <span class="pl-k">=</span> (<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">float</span> <span class="pl-smi">o</span>.<span class="pl-smi">Year</span>))
     .<span class="pl-en">Geom_Area</span>(<span class="pl-smi">y</span> <span class="pl-k">=</span> (<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">float</span> <span class="pl-smi">o</span>.<span class="pl-smi">N</span>))
     .<span class="pl-en">Geom_VLine</span>(<span class="pl-smi">vline</span>, (<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">o</span>), <span class="pl-smi">color</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>#FFFFFF<span class="pl-pds">"</span></span>, <span class="pl-smi">lineType</span> <span class="pl-k">=</span> <span class="pl-smi">LineType</span>.<span class="pl-smi">Dashed</span>)
-    .<span class="pl-en">Scale_Fill_Discrete</span>((<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Name</span>), <span class="pl-smi">GGNet</span>.<span class="pl-smi">Colors</span>.<span class="pl-smi">FT</span>, <span class="pl-smi">guide</span> <span class="pl-k">=</span> <span class="pl-c1">false</span>)
+    .<span class="pl-en">Scale_Fill_Discrete</span>((<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Name</span>), <span class="pl-smi">Colors</span>.<span class="pl-smi">FT</span>, <span class="pl-smi">guide</span> <span class="pl-k">=</span> <span class="pl-c1">false</span>)
     .<span class="pl-en">Facet_Wrap</span>(<span class="pl-smi">selector</span> <span class="pl-k">=</span> (<span class="pl-smi">fun</span> <span class="pl-smi">o</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-smi">o</span>.<span class="pl-smi">Name</span>), <span class="pl-smi">freeY</span> <span class="pl-k">=</span> <span class="pl-c1">true</span>)
     .<span class="pl-en">Title</span>(<span class="pl-s"><span class="pl-pds">"</span>Popularity of Beatles Names<span class="pl-pds">"</span></span>)
     .<span class="pl-en">YLab</span>(<span class="pl-s"><span class="pl-pds">"</span>#<span class="pl-pds">"</span></span>)
     .<span class="pl-en">XLab</span>(<span class="pl-s"><span class="pl-pds">"</span>Year<span class="pl-pds">"</span></span>)
-    .<span class="pl-en">Theme</span>();
+    .<span class="pl-en">Theme</span>()
 </FSharp>
 </Code>
             </div>
