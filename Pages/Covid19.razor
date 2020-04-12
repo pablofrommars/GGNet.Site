@@ -13,12 +13,12 @@
 <div class="row flex-fill mx-0">
 
     <!-- Side Menu -->
-    <div class="col-auto px-0 pt-2 bg-light border-right">
-        <ul class="list-unstyled h3">
-            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 0)><a class="px-3 @(sideMenuItem != 0 ? "text-secondary" : "")"><i class="fas fa-fw fa-globe-europe"></i></a></li>
-            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 1)><a class="px-3 @(sideMenuItem != 1 ? "text-secondary" : "")"><i class="fas fa-fw fa-lungs-virus"></i></a></li>
-            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 2)><a class="px-3 @(sideMenuItem != 2 ? "text-secondary" : "")"><i class="fas fa-fw fa-birthday-cake"></i></a></li>
-            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 3)><a class="px-3 @(sideMenuItem != 3 ? "text-secondary" : "")"><i class="fas fa-fw fa-hand-holding-medical"></i></a></li>
+    <div class="col-auto px-0 pt-2 border-right">
+        <ul class="list-unstyled covid19-menu">
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 0)><a class="px-2 @(sideMenuItem == 0 ? "active" : "")"><i class="fas fa-fw fa-globe-europe"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 1)><a class="px-2 @(sideMenuItem == 1 ? "active" : "")"><i class="fas fa-fw fa-lungs-virus"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 2)><a class="px-2 @(sideMenuItem == 2 ? "active" : "")"><i class="fas fa-fw fa-birthday-cake"></i></a></li>
+            <li class="mb-3 cursor-pointer" @onclick=@(() => sideMenuItem = 3)><a class="px-2 @(sideMenuItem == 3 ? "active" : "")"><i class="fas fa-fw fa-hand-holding-medical"></i></a></li>
         </ul>
     </div>
 
@@ -53,7 +53,7 @@
 
                     <div class="flex-fill mt-2">
                         <div class="position-relative h-100 overflow-auto">
-                            <div class="position-absolute w-100 fa-xs">
+                            <div class="position-absolute w-100 fa-xs covid19-table">
                                 <Table Loader=@(() => Loader.Data(data)) Context="p" Sort="-1" Small=true OnRowClick=@((TS o) => OnClick(o))>
                                     <Loading><p>Loading...</p></Loading>
                                     <Header>
@@ -124,7 +124,7 @@
                 <!-- Main Right -->
                 <div class="col-6 px-0 d-flex flex-column">
 
-                    <ul class="nav nav-u">
+                    <ul class="nav nav-u fa-xs covid19-menu">
                         <li class="nav-item cursor-pointer" @onclick=@(() => mainMenuItem = 0)>
                             <a class="nav-link @(mainMenuItem == 0 ? "active" : "")"><i class="fas fa-xs fa-chart-line mr-1"></i>Chart</a>
                         </li>
@@ -219,8 +219,21 @@
 
                         </div>
                         <div class="flex-fill d-flex">
-                            <div class="m-auto flex-fill p-2 border rounded shadow-sm">
-                                <Plot Data=@statData T=StatPoint TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width=720 Height=400 @ref=@statPlot />
+                            <div class="m-auto flex-fill border rounded shadow-sm d-flex flex-column">
+                                <ul class="nav nav-u justify-content-end fa-xs covid19-menu">
+                                    <li class="nav-item cursor-pointer" @onclick=@(() => mainMenuPlotItem = 0)>
+                                        <a class="nav-link @(mainMenuPlotItem == 0 ? "active" : "")">Confirmed</a>
+                                    </li>
+                                    <li class="nav-item cursor-pointer" @onclick=@(() => mainMenuPlotItem = 1)>
+                                        <a class="nav-link @(mainMenuPlotItem == 1 ? "active" : "")">Deaths</a>
+                                    </li>
+                                </ul>
+                                <div class="flex-fill p-2 @(mainMenuPlotItem != 0 ? "d-none" : "")">
+                                    <Plot Data=@data1 T=TS.Point TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width=720 Height=400 @ref=@plot1 />
+                                </div>
+                                <div class="flex-fill p-2 @(mainMenuPlotItem != 1 ? "d-none" : "")">
+                                    <Plot Data=@data2 T=TS.Point TX=LocalDate TY=Double RenderPolicy=RenderPolicy.Auto Width=720 Height=400 @ref=@plot2 />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -228,7 +241,7 @@
                     <!-- Main Right Data -->
                     <div class=@(mainMenuItem == 1 ? "flex-fill d-flex flex-column" : "d-none")>
                         <div class="position-relative h-100 overflow-auto">
-                            <div class="position-absolute w-100 fa-xs">
+                            <div class="position-absolute w-100 fa-xs covid19-table">
                                 <Table Loader=@(() => Loader.Data(ts.Points)) Context="p" Small=true>
                                     <Loading><p>Loading...</p></Loading>
                                     <Header>

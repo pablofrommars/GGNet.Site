@@ -87,10 +87,6 @@ html, body {
     content: '\A0';
 }
 
-.covid:not(:last-child) {
-    margin-right: 1em !important;
-}
-
 .nav-u {
     border-bottom: 2px solid rgba(0, 0, 0, .125);
 }
@@ -110,3 +106,28 @@ html, body {
             border-bottom: 2px solid var(--blue);
             color: inherit;
         }
+
+.covid .text-muted {
+    color: #95aac9 !important;
+}
+
+.covid:not(:last-child) {
+    margin-right: 1em !important;
+}
+
+.covid19-menu a {
+    color: #6e84a3 !important;
+}
+
+    .covid19-menu a:hover {
+        color: var(--dark) !important;
+    }
+
+    .covid19-menu a.active {
+        color: var(--dark) !important;
+    }
+
+.covid19-table thead {
+    background-color: #f9fbfd !important;
+    color: #95aac9 !important;
+}

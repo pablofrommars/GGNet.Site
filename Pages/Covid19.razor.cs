@@ -14,12 +14,15 @@ using GGNet.NaturalEarth;
 
 using GGNet.Site.Data;
 
+using static System.Math;
+
 namespace GGNet.Site.Pages
 {
     public partial class Covid19 : ComponentBase
     {
         private int sideMenuItem = 0;
         private int mainMenuItem = 0;
+        private int mainMenuPlotItem = 0;
 
         private List<TS> data;
         private TS ts;
@@ -29,9 +32,11 @@ namespace GGNet.Site.Pages
         private readonly Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)> sparks =
             new Dictionary<string, (Data<TS.Point, LocalDate, double> confirmed, Data<TS.Point, LocalDate, double> deaths)>();
 
-        private Source<StatPoint> statSource = new Source<StatPoint>();
-        private Data<StatPoint, LocalDate, double> statData;
-        private Plot<StatPoint, LocalDate, double> statPlot;
+        private Source<TS.Point> source = new Source<TS.Point>();
+        private Data<TS.Point, LocalDate, double> data1;
+        private Data<TS.Point, LocalDate, double> data2;
+        private Plot<TS.Point, LocalDate, double> plot1;
+        private Plot<TS.Point, LocalDate, double> plot2;
 
         private Data<TS, double, double> cfr;
 
@@ -75,7 +80,7 @@ namespace GGNet.Site.Pages
                 theme.Tooltip.Text.Color = "#000000";
 
                 map = Plot.New(data.Where(o => o.Name != "World"), o => o.Country.Capital.Point.Longitude, o => o.Country.Capital.Point.Latitude)
-                    .Geom_Map(Scale110.Countries, o => o.Polygons, fill: "grey", alpha: 0.1, color: "#FFFFFF", width: 0.5)
+                    .Geom_Map(Scale110.Countries, o => o.Polygons, fill: "#6e84a3", alpha: 0.1, color: "#FFFFFF", width: 0.5)
                     .Geom_Point(onclick: (ts, e) => OnClick(ts), tooltip: Tooltip, color: "#000000", alpha: 0.5, animation: true)
                     .Scale_Longitude()
                     .Scale_Latitude()
@@ -85,16 +90,20 @@ namespace GGNet.Site.Pages
             }
 
             ts = data.First();
-            statSource.Add(ts.GetStatPoints());
+            source.Add(ts.Points);
 
-            var palette = Discrete<Stat, string>.Enum(new[] { "var(--confirmed-color)", "var(--deaths-color)" });
+            var palette = Discrete<Stat, string>.Enum(new[] { "", "var(--deaths-color)" });
 
-            statData = Plot.New(statSource, o => o.Date, o => o.Cumulative)
-                .Geom_Bar(y: o => o.Delta, tooltip: Tooltip, alpha: 0.6, position: PositionAdjustment.Stack)
-                .Geom_Line(tooltip: Tooltip, width: 3, alpha: 0.8)
+            data1 = Plot.New(source, o => o.Date, o => o.ConfirmedCumulative)
+                .Geom_Bar(y: o => o.ConfirmedDelta, tooltip: Tooltip1, fill: "var(--confirmed-color)", alpha: 0.6)
+                .Geom_Line(tooltip: Tooltip1, color: "var(--confirmed-color)", width: 3, alpha: 0.8)
                 .Scale_Y_Continuous("#,##0")
-                .Scale_Color_Discrete(o => o.Stat, palette)
-                .Scale_Fill_Discrete(o => o.Stat, palette, guide: false)
+                .Theme(dark: false, legend: Position.Bottom);
+
+            data2 = Plot.New(source, o => o.Date, o => o.DeathsCumulative)
+                .Geom_Bar(y: o => o.DeathsDelta, tooltip: Tooltip2, fill: "var(--deaths-color)", alpha: 0.6)
+                .Geom_Line(tooltip: Tooltip2, color: "var(--deaths-color)", width: 3, alpha: 0.8)
+                .Scale_Y_Continuous("#,##0")
                 .Theme(dark: false, legend: Position.Bottom);
 
             {
@@ -125,11 +134,24 @@ namespace GGNet.Site.Pages
                         .Join(ageData, o => o.Country.A3, o => o.a3, (o, p) => (ts: o, age: p.age60_))
                         .ToList();
 
+                var t = 1.9855;
+                var n = 86;
+                var mse = 0.4248488275613588;
+                var xavg = 0.170082554;
+                var sx = 0.0831531957;
+                var N = 100;
+
+                double CI(double x) => t * Sqrt(n / (n - 2.0) * mse) * Sqrt(1.0 / n + (x - xavg) * (x - xavg) / ((n - 1.0) * sx * sx));
+
                 age = Plot.New(combined, o => o.age / 100, o => o.ts.DeathsCumulative / o.ts.Population * 1000000.0)
-                    .Title("Proportion of Population above 60")
+                    .Title("Age impact on Mortality")
+                    .SubTitle("R²=0.4")
+                    .Geom_Ribbon(Enumerable.Range(0, N).Select(o => o * 0.4 / N), o => o, o => Pow(10.0, 6.37009 * o - 0.540860355 - CI(o)), o => Pow(10.0, 6.37009 * o - 0.540860355 + CI(o)), fill: "#6e84a3", alpha: 0.1, scale: (false, true))
+                    .Geom_ABLine(new[] { (a: 6.37009, b: -0.540860355) }, o => o.a, o => o.b, o => $"y = {o.a:N2}x {o.b:N2}", transformation: (false, false), color: "rgba(0, 0, 0, 0.3)")
                     .Geom_Point(tooltip: o => o.ts.Name, size: 3, alpha: 0.5, animation: true)
-                    .Scale_X_Continuous(format: "P2")
+                    .Scale_X_Continuous(format: "P0")
                     .Scale_Y_Log10()
+                    .XLab("Proportion of Population above 60")
                     .YLab("Confirmed Deaths / Million - Log")
                     .Scale_Color_Discrete(o => o.ts.Country.Continent, Colors.Viridis)
                     .Theme(dark: false);
@@ -140,13 +162,14 @@ namespace GGNet.Site.Pages
         {
             this.ts = ts;
 
-            statSource.Clear();
+            source.Clear();
 
-            statSource.Add(ts.GetStatPoints());
+            source.Add(ts.Points);
 
             StateHasChanged();
 
-            await statPlot.RefreshAsync().ConfigureAwait(false);
+            await plot1.RefreshAsync().ConfigureAwait(false);
+            await plot2.RefreshAsync().ConfigureAwait(false);
         }
 
         public string Tooltip(TS ts) =>
@@ -160,10 +183,16 @@ $@"
 </div>
 ";
 
-        public string Tooltip(StatPoint o) =>
+        public string Tooltip1(TS.Point o) =>
 $@"
 <b>{o.Date}</b><br/>
-{o.Stat}: {o.Cumulative:#,##0} (+{o.Delta:#,##0})
+{o.ConfirmedCumulative:#,##0} (+{o.ConfirmedDelta:#,##0})
+";
+
+        public string Tooltip2(TS.Point o) =>
+$@"
+<b>{o.Date}</b><br/>
+{o.DeathsCumulative:#,##0} (+{o.DeathsDelta:#,##0})
 ";
 
         public string TooltipCFR(TS ts) =>
